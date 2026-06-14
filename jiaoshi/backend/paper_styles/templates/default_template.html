@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>{{ paper.title }}</title>
+<style>
+    /* ===== 默认试卷样式 ===== */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+        font-family: {{ style.font_family | default('"SimSun", "宋体", serif') }};
+        font-size: {{ style.font_size | default('14pt') }};
+        line-height: 2.0;
+        color: #333;
+        padding: 40px;
+        background: #fff;
+    }
+
+    .paper {
+        max-width: 210mm;
+        margin: 0 auto;
+    }
+
+    /* -- 试卷头 -- */
+    .paper-header {
+        text-align: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 3px double {{ style.header_color | default('#333') }};
+    }
+    .paper-title {
+        font-size: 20pt;
+        font-weight: bold;
+        letter-spacing: 2px;
+        margin-bottom: 8px;
+    }
+    .paper-subtitle {
+        font-size: 12pt;
+        color: #666;
+    }
+
+    /* -- 密封线 -- */
+    .seal-line {
+        border: 2px solid {{ style.accent_color | default('#1a5276') }};
+        padding: 12px 16px;
+        margin-bottom: 24px;
+        display: flex;
+        justify-content: space-between;
+        font-size: 11pt;
+        background: #fafafa;
+        border-radius: 2px;
+    }
+    .seal-line span {
+        white-space: nowrap;
+    }
+
+    /* -- 大题区 -- */
+    .section {
+        margin-bottom: 24px;
+        page-break-inside: avoid;
+    }
+    .section-title {
+        font-size: 15pt;
+        font-weight: bold;
+        padding: 6px 0;
+        margin-bottom: 10px;
+        border-bottom: 2px solid {{ style.header_color | default('#333') }};
+        color: {{ style.header_color | default('#333') }};
+    }
+    .section-desc {
+        font-size: 11pt;
+        color: #777;
+        margin-bottom: 8px;
+        font-style: italic;
+    }
+
+    /* -- 题目 -- */
+    .question {
+        margin: 14px 0;
+        padding: 4px 0 4px 8px;
+        border-left: 2px solid transparent;
+    }
+    .question:hover {
+        border-left-color: {{ style.accent_color | default('#1a5276') }};
+    }
+    .question-number {
+        font-weight: bold;
+        margin-right: 6px;
+    }
+    .question-text {
+        display: inline;
+    }
+    .question-score {
+        color: #999;
+        font-size: 10pt;
+        margin-left: 8px;
+    }
+
+    /* -- 选项 -- */
+    .options {
+        margin: 6px 0 6px 24px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4px;
+    }
+    .option {
+        padding: 2px 4px;
+    }
+
+    /* -- 答题区 -- */
+    .answer-area {
+        margin-top: 8px;
+        padding: 8px 12px;
+        background: #fdfdfd;
+        border: 1px dashed #ddd;
+        border-radius: 3px;
+        min-height: 40px;
+    }
+    .answer-hint {
+        color: #aaa;
+        font-size: 10pt;
+        font-style: italic;
+    }
+
+    /* -- 页脚 -- */
+    .paper-footer {
+        text-align: center;
+        margin-top: 30px;
+        padding-top: 10px;
+        border-top: 1px solid #ddd;
+        font-size: 10pt;
+        color: #999;
+    }
+</style>
+</head>
+<body>
+<div class="paper">
+
+    <!-- 试卷头 -->
+    <div class="paper-header">
+        <h1 class="paper-title">{{ paper.title }}</h1>
+        {% if paper.subtitle %}
+        <p class="paper-subtitle">{{ paper.subtitle }}</p>
+        {% endif %}
+    </div>
+
+    <!-- 密封线 -->
+    <div class="seal-line">
+        <span>姓名：______________</span>
+        <span>准考证号：______________</span>
+        <span>总分：{{ paper.total_score }}分</span>
+        <span>时间：{{ paper.time_limit_minutes }}分钟</span>
+    </div>
+
+    <!-- 各大题 -->
+    {% for section in paper.sections %}
+    <div class="section">
+        <h2 class="section-title">
+            {{ section.section_title }}
+            <span style="font-size:11pt;font-weight:normal;color:#888;">
+                （共{{ section.questions|length }}题，每题{{ section.score_per_question }}分，合计{{ section.total_score }}分）
+            </span>
+        </h2>
+
+        {% if section.description %}
+        <p class="section-desc">{{ section.description }}</p>
+        {% endif %}
+
+        {% for q in section.questions %}
+        <div class="question">
+            <p>
+                <span class="question-number">{{ q.sequence_number }}.</span>
+                <span class="question-text">{{ q.question_text }}</span>
+                <span class="question-score">({{ q.score }}分)</span>
+            </p>
+
+            {% if q.options %}
+            <div class="options">
+                {% for opt in q.options %}
+                <span class="option">{{ opt.label }}. {{ opt.text }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if q.question_type not in ('choice',) %}
+            <div class="answer-area">
+                {% if q.question_type == 'essay' %}
+                <p class="answer-hint">（答题区域）</p>
+                <div style="height:120px;"></div>
+                {% elif q.question_type == 'calculation' %}
+                <p class="answer-hint">（解题过程）</p>
+                <div style="height:80px;"></div>
+                {% else %}
+                <div style="height:30px;"></div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+
+    <div class="paper-footer">
+        — 本试卷由智能试卷生成系统自动生成 —
+    </div>
+
+</div>
+</body>
+</html>

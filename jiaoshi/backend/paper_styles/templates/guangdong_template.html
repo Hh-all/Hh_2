@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>{{ paper.title }}</title>
+<style>
+    /* ===== 广东卷试卷样式 =====
+       风格特点：活力、实用，绿色系配暖色调，强调应用场景
+    */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+        font-family: {{ style.font_family | default('"SimSun", "宋体", "Microsoft YaHei", sans-serif') }};
+        font-size: {{ style.font_size | default('14pt') }};
+        line-height: 2.0;
+        color: #263238;
+        padding: 44px 52px;
+        background: #fafdf9;
+    }
+
+    .paper {
+        max-width: 210mm;
+        margin: 0 auto;
+        background: #fff;
+        border-radius: 6px;
+        padding: 40px 44px;
+        box-shadow: 0 1px 8px rgba(27,94,32,0.06);
+    }
+
+    /* -- 试卷头（广东特色：生机绿 + 暖金点缀） -- */
+    .paper-header {
+        text-align: center;
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+        border-bottom: 3px solid {{ style.accent_color | default('#2e7d32') }};
+        position: relative;
+    }
+    .paper-title {
+        font-family: "SimHei", "黑体", "Microsoft YaHei", sans-serif;
+        font-size: 20pt;
+        font-weight: bold;
+        letter-spacing: 3px;
+        color: {{ style.header_color | default('#1b5e20') }};
+        margin-bottom: 6px;
+    }
+    .paper-subtitle {
+        font-size: 11pt;
+        color: #558b2f;
+    }
+    /* 广东特色：底部金色装饰线 */
+    .header-decoration-bottom {
+        position: absolute;
+        bottom: -3px;
+        left: 10%;
+        right: 10%;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #f9a825, transparent);
+    }
+
+    /* -- 密封线（广东特色：绿边暖底） -- */
+    .seal-line {
+        border: 2px solid {{ style.accent_color | default('#2e7d32') }};
+        border-radius: 6px;
+        padding: 14px 18px;
+        margin-bottom: 26px;
+        display: flex;
+        justify-content: space-between;
+        font-size: 11pt;
+        background: linear-gradient(135deg, #f1f8e9, #fff);
+    }
+    .seal-line span {
+        white-space: nowrap;
+    }
+
+    /* -- 大题区 -- */
+    .section {
+        margin-bottom: 26px;
+        page-break-inside: avoid;
+    }
+    .section-title {
+        font-family: "SimHei", "黑体", sans-serif;
+        font-size: 15pt;
+        font-weight: bold;
+        padding: 8px 0 8px 12px;
+        margin-bottom: 12px;
+        color: {{ style.header_color | default('#1b5e20') }};
+        background: linear-gradient(90deg, #e8f5e9, transparent 90%);
+        border-radius: 4px 4px 0 0;
+    }
+
+    /* -- 题目（广东特色：场景化标注） -- */
+    .question {
+        margin: 14px 0;
+        padding: 8px 0 8px 10px;
+        border-left: 3px solid transparent;
+    }
+    .question.scenario {
+        border-left-color: {{ style.accent_color | default('#2e7d32') }};
+        background: #f9fdf7;
+    }
+    .question-number {
+        font-weight: bold;
+        margin-right: 6px;
+        color: {{ style.accent_color | default('#2e7d32') }};
+    }
+    .question-text {
+        display: inline;
+    }
+    .question-score {
+        color: #90a4ae;
+        font-size: 10pt;
+        margin-left: 6px;
+    }
+    /* 场景标签 */
+    .scenario-tag {
+        display: inline-block;
+        font-size: 9pt;
+        background: #e8f5e9;
+        color: {{ style.accent_color | default('#2e7d32') }};
+        padding: 1px 6px;
+        border-radius: 10px;
+        margin-left: 8px;
+        font-weight: normal;
+    }
+
+    /* -- 选项 -- */
+    .options {
+        margin: 8px 0 4px 28px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4px;
+    }
+    .option {
+        padding: 4px 6px;
+    }
+
+    /* -- 答题区（广东特色：实用简洁） -- */
+    .answer-area {
+        margin-top: 8px;
+        padding: 10px 14px;
+        background: #fafdf9;
+        border: 2px solid #e0e8e0;
+        border-radius: 4px;
+        min-height: 40px;
+    }
+    .answer-hint {
+        color: #a5b8a0;
+        font-size: 10pt;
+    }
+
+    /* -- 听说理解区（广东特色：英语听说题） -- */
+    .section.listening-speaking {
+        border: 2px dashed {{ style.accent_color | default('#2e7d32') }};
+        border-radius: 8px;
+        padding: 18px;
+        background: linear-gradient(135deg, #f9fdf7, #fff);
+    }
+    .section.listening-speaking .section-title {
+        color: {{ style.accent_color | default('#2e7d32') }};
+        background: none;
+        border-bottom: 2px dashed {{ style.accent_color | default('#2e7d32') }};
+    }
+
+    .paper-footer {
+        text-align: center;
+        margin-top: 36px;
+        padding-top: 12px;
+        border-top: 1px solid #c8e6c9;
+        font-size: 10pt;
+        color: #81c784;
+    }
+</style>
+</head>
+<body>
+<div class="paper">
+
+    <div class="paper-header">
+        <h1 class="paper-title">{{ paper.title }}</h1>
+        {% if paper.subtitle %}
+        <p class="paper-subtitle">{{ paper.subtitle }}</p>
+        {% endif %}
+        <div class="header-decoration-bottom"></div>
+    </div>
+
+    <div class="seal-line">
+        <span>姓名：______________</span>
+        <span>准考证号：______________</span>
+        <span>总分：{{ paper.total_score }}分</span>
+        <span>时间：{{ paper.time_limit_minutes }}分钟</span>
+    </div>
+
+    {% for section in paper.sections %}
+    <div class="section{% if section.section_id in ('listening_speaking', 'listening') %} listening-speaking{% endif %}">
+        <h2 class="section-title">
+            {{ section.section_title }}
+            <span style="font-size:10pt;font-weight:normal;color:#689f38;">
+                （共{{ section.questions|length }}题，每题{{ section.score_per_question }}分，合计{{ section.total_score }}分）
+            </span>
+        </h2>
+
+        {% if section.description %}
+        <p style="color:#558b2f;font-size:10pt;margin-bottom:8px;">{{ section.description }}</p>
+        {% endif %}
+
+        {% for q in section.questions %}
+        {% set has_scene = q._has_scenario or (q.question_text and ('广州' in q.question_text or '深圳' in q.question_text or '广东' in q.question_text or '珠江' in q.question_text or '大湾区' in q.question_text)) %}
+        <div class="question{% if has_scene %} scenario{% endif %}">
+            <p>
+                <span class="question-number">{{ q.sequence_number }}.</span>
+                <span class="question-text">{{ q.question_text }}</span>
+                <span class="question-score">({{ q.score }}分)</span>
+                {% if has_scene %}
+                <span class="scenario-tag">生活场景</span>
+                {% endif %}
+            </p>
+
+            {% if q.options %}
+            <div class="options">
+                {% for opt in q.options %}
+                <span class="option">{{ opt.label }}. {{ opt.text }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if q.question_type not in ('choice',) %}
+            <div class="answer-area">
+                {% if q.question_type == 'essay' %}
+                <p class="answer-hint">（请在答题区作答）</p>
+                <div style="height:180px;"></div>
+                {% elif q.question_type == 'calculation' %}
+                <p class="answer-hint">（请写出解题步骤）</p>
+                <div style="height:80px;"></div>
+                {% else %}
+                <div style="height:40px;"></div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+
+    <div class="paper-footer">
+        广东省 · {{ paper.subtitle }} · 智能试卷生成系统
+    </div>
+
+</div>
+</body>
+</html>

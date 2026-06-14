@@ -1,0 +1,26 @@
+# Web 框架
+flask>=3.0
+flask-cors>=4.0
+
+# LLM / AI
+openai>=1.30
+tiktoken>=0.7
+
+# 向量数据库 & RAG
+chromadb>=0.5
+langchain>=0.2
+langchain-community>=0.2
+langchain-openai>=0.1
+
+# 文档处理
+pypdf2>=3.0
+python-docx>=1.1
+markdown>=3.5
+
+# 配置与工具
+pyyaml>=6.0
+python-dotenv>=1.0
+
+# 数据处理
+pandas>=2.0
+numpy>=1.24

@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>试卷预览 - 智能试卷生成系统</title>
+    <style>
+        /* ===== 打印设置 ===== */
+        @media print {
+            @page {
+                size: A4;
+                margin: 18mm 20mm 18mm 20mm;
+            }
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .toolbar, .question-actions, .difficulty-badge, .q-diff-select { display: none !important; }
+            .paper-wrapper { padding: 0 !important; }
+            .paper { box-shadow: none !important; padding: 0 !important; width: auto !important; min-height: auto !important; }
+            .paper-page { box-shadow: none !important; padding: 0 !important; margin: 0 !important; }
+            .question {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            .section-title {
+                page-break-after: avoid;
+                break-after: avoid;
+            }
+            .section {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            .paper-page + .paper-page {
+                page-break-before: always;
+                break-before: page;
+            }
+        }
+
+        /* ===== 基础 ===== */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: "SimSun", "Songti SC", "Noto Serif CJK SC", "Times New Roman", serif;
+            background: #e8e8e8;
+            color: #000;
+            line-height: 1.9;
+            font-size: 14px;
+        }
+
+        /* ===== 工具栏 ===== */
+        .toolbar {
+            position: sticky; top: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 8px;
+            padding: 10px 20px;
+            background: #1e293b; color: #fff; font-size: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.3);
+        }
+        .toolbar .left { display: flex; align-items: center; gap: 12px; }
+        .toolbar .title { font-weight: 600; font-size: 15px; }
+        .toolbar .meta { font-size: 12px; opacity: .7; }
+        .toolbar .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .toolbar button {
+            padding: 6px 14px; font-size: 12px; border: none; border-radius: 4px;
+            cursor: pointer; font-weight: 500; white-space: nowrap;
+        }
+        .btn-pdf   { background: #dc2626; color: #fff; }
+        .btn-pdf:hover   { background: #b91c1c; }
+        .btn-print { background: #4f46e5; color: #fff; }
+        .btn-print:hover { background: #4338ca; }
+        .btn-regen { background: #f59e0b; color: #000; }
+        .btn-regen:hover { background: #d97706; }
+        .btn-back  { background: #475569; color: #fff; }
+        .btn-back:hover  { background: #334155; }
+        .btn-status { font-size: 11px; opacity: .8; padding: 4px 10px; border-radius: 3px; }
+        .btn-status.ok    { background: #16a34a; }
+        .btn-status.warn  { background: #d97706; }
+        .btn-status.error { background: #dc2626; }
+        .global-diff { display: flex; align-items: center; gap: 4px; font-size: 12px; }
+        .global-diff label { opacity: .8; }
+        .global-diff select {
+            padding: 3px 6px; border: 1px solid #475569; border-radius: 3px;
+            background: #334155; color: #fff; font-size: 12px; cursor: pointer;
+        }
+
+        /* ===== 页面容器 ===== */
+        .paper-wrapper {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 32px; padding: 24px 0 48px;
+        }
+        .paper-page {
+            width: 210mm;
+            min-height: 297mm;
+            background: #fff;
+            padding: 22mm 22mm 20mm;
+            box-shadow: 0 2px 16px rgba(0,0,0,.12);
+        }
+
+        /* ===== 卷头 ===== */
+        .paper-header {
+            text-align: center;
+            border-bottom: 3px double #000;
+            padding-bottom: 14px;
+            margin-bottom: 16px;
+        }
+        .paper-header h1 {
+            font-size: 22px; font-weight: bold; letter-spacing: 3px;
+            margin-bottom: 4px;
+        }
+        .paper-header .subtitle {
+            font-size: 14px; color: #333; margin-bottom: 4px;
+        }
+        .paper-header .meta {
+            display: flex; justify-content: center; gap: 32px;
+            margin-top: 6px; font-size: 13px; color: #444;
+        }
+        .paper-header .meta span { white-space: nowrap; }
+
+        /* ===== 密封线 ===== */
+        .seal-row {
+            display: flex; justify-content: space-between; align-items: center;
+            border: 1.5px solid #000; padding: 8px 16px;
+            margin-bottom: 18px; font-size: 12px;
+        }
+        .seal-row .seal-item { white-space: nowrap; }
+        .seal-row .seal-blank {
+            display: inline-block; width: 80px;
+            border-bottom: 1px solid #000; margin: 0 4px;
+        }
+
+        /* ===== 分数表 ===== */
+        .score-table {
+            width: 100%; border-collapse: collapse;
+            margin-bottom: 16px; font-size: 13px;
+        }
+        .score-table th, .score-table td {
+            border: 1px solid #000; padding: 4px 6px; text-align: center;
+        }
+        .score-table th { background: #f0f0f0; font-weight: 600; }
+        .score-table td.score-cell { min-width: 40px; height: 28px; }
+
+        /* ===== 题型区 ===== */
+        .section {
+            margin-bottom: 16px;
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+        .section-title {
+            font-size: 15px; font-weight: bold;
+            margin-bottom: 10px; padding-bottom: 4px;
+            border-bottom: 1px solid #ccc;
+            page-break-after: avoid; break-after: avoid;
+        }
+        .section-title .score-hint {
+            font-size: 12px; font-weight: normal; color: #666; margin-left: 6px;
+        }
+
+        /* ===== 题目 ===== */
+        .question {
+            margin-bottom: 14px;
+            padding: 6px 0;
+            page-break-inside: avoid;
+            break-inside: avoid;
+            position: relative;
+            transition: background .15s;
+        }
+        .question:hover { background: #fafbfc; }
+        .question.replacing { opacity: .5; pointer-events: none; }
+        .question .q-num { font-weight: bold; margin-right: 4px; }
+        .question .q-score { font-size: 11px; color: #888; margin-left: 4px; }
+        .question .q-text { display: inline; }
+
+        .options {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 2px 24px; margin-top: 4px; padding-left: 26px; font-size: 13px;
+        }
+        .options .opt { padding: 2px 0; }
+
+        .answer-area {
+            border: 1px dashed #ccc;
+            min-height: 48px; margin-top: 6px; margin-left: 22px;
+            border-radius: 2px;
+        }
+        .answer-area.large { min-height: 90px; }
+        .answer-area.xlarge { min-height: 150px; }
+
+        /* ===== 操作按钮 ===== */
+        .question-actions {
+            display: flex; align-items: center; gap: 6px;
+            margin-top: 4px; padding-left: 22px;
+            font-size: 11px; opacity: .35; transition: opacity .15s;
+        }
+        .question:hover .question-actions { opacity: 1; }
+        .question-actions button {
+            padding: 2px 8px; font-size: 11px; border: 1px solid #d0d5dd;
+            border-radius: 3px; background: #fff; cursor: pointer; color: #374151;
+        }
+        .question-actions button:hover { background: #f3f4f6; border-color: #9ca3af; }
+        .question-actions button.danger { color: #dc2626; border-color: #fca5a5; }
+        .question-actions button.danger:hover { background: #fef2f2; }
+        .question-actions select {
+            padding: 2px 4px; font-size: 11px; border: 1px solid #d0d5dd;
+            border-radius: 3px; background: #fff; cursor: pointer;
+        }
+        .difficulty-badge {
+            display: inline-block; padding: 1px 6px; border-radius: 3px;
+            font-size: 10px; font-weight: 600;
+        }
+        .diff-easy   { background: #dcfce7; color: #166534; }
+        .diff-medium { background: #fef3c7; color: #92400e; }
+        .diff-hard   { background: #fee2e2; color: #991b1b; }
+
+        /* ===== 空状态 ===== */
+        .empty-state { text-align: center; padding: 80px 20px; color: #666; }
+        .empty-state h2 { margin-bottom: 10px; }
+        .empty-state a { color: #4f46e5; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner {
+            display: inline-block; width: 14px; height: 14px;
+            border: 2px solid #fff; border-top-color: transparent;
+            border-radius: 50%; animation: spin .6s linear infinite;
+            margin-right: 4px; vertical-align: middle;
+        }
+
+        /* ===== 分页指示 ===== */
+        .page-indicator {
+            text-align: center; font-size: 11px; color: #999;
+            padding: 6px 0; margin: 0 0 24px; user-select: none;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 工具栏 -->
+<div class="toolbar">
+    <div class="left">
+        <span class="title" id="toolbarTitle">试卷预览</span>
+        <span class="meta" id="toolbarMeta"></span>
+        <span class="btn-status" id="apiStatus">检查中...</span>
+    </div>
+    <div class="actions">
+        <div class="global-diff">
+            <label for="globalDifficulty">整体难度:</label>
+            <select id="globalDifficulty">
+                <option value="1">简单</option><option value="2">中等偏易</option>
+                <option value="3" selected>中等</option><option value="4">中等偏难</option><option value="5">困难</option>
+            </select>
+        </div>
+        <button class="btn-back" onclick="history.back()">返回修改</button>
+        <button class="btn-regen" id="btnRegen" onclick="regeneratePaper()">重新生成</button>
+        <button class="btn-print" onclick="window.print()">打印</button>
+        <button class="btn-pdf" id="btnPdf" onclick="downloadPDF()">下载 PDF</button>
+    </div>
+</div>
+
+<!-- 分页指示 -->
+<div class="page-indicator" id="pageIndicator">第 1 页 / 共 2 页</div>
+
+<!-- 试卷主体 -->
+<div class="paper-wrapper" id="paperWrapper">
+    <div class="empty-state" id="emptyState">
+        <h2>暂无试卷数据</h2>
+        <p>请先返回 <a href="index.html">配置页面</a> 生成试卷</p>
+    </div>
+</div>
+
+<script>
+(function () {
+    var API_BASE = 'http://127.0.0.1:5000';
+    var TYPE_LABELS = { choice: '选择题', fill_blank: '填空题', short_answer: '解答题', true_false: '判断题', calculation: '计算题', essay: '论述题' };
+    var DIFF_LABELS = { 1: '简单', 2: '中等偏易', 3: '中等', 4: '中等偏难', 5: '困难' };
+    var DIFF_CLASS = { 1: 'diff-easy', 2: 'diff-easy', 3: 'diff-medium', 4: 'diff-hard', 5: 'diff-hard' };
+    var SCORE_MAP = { choice: 3, fill_blank: 3, true_false: 2, short_answer: 8, calculation: 10, essay: 20 };
+
+    var paperData = null;
+    var paperMeta = null;
+    var apiAvailable = false;
+    var wrapper = document.getElementById('paperWrapper');
+    var pageInd = document.getElementById('pageIndicator');
+
+    // ---------- 初始化 ----------
+    checkAPI();
+    loadPaperData();
+
+    function loadPaperData() {
+        var raw = localStorage.getItem('paperData');
+        if (!raw) {
+            var urlParams = new URLSearchParams(window.location.search);
+            raw = urlParams.get('data');
+        }
+        if (raw) {
+            try {
+                var data = JSON.parse(raw);
+                setPaperData(data.questions || [], data.metadata || {});
+            } catch(e) { showEmpty(); }
+        }
+    }
+
+    function setPaperData(questions, metadata) {
+        paperData = questions;
+        paperMeta = metadata || {};
+        renderPaper();
+        updateToolbar();
+    }
+
+    function checkAPI() {
+        fetch(API_BASE + '/api/health')
+            .then(function(r) { return r.json(); })
+            .then(function() {
+                apiAvailable = true;
+                document.getElementById('apiStatus').textContent = 'API 已连接';
+                document.getElementById('apiStatus').className = 'btn-status ok';
+            })
+            .catch(function() {
+                apiAvailable = false;
+                document.getElementById('apiStatus').textContent = '离线模式';
+                document.getElementById('apiStatus').className = 'btn-status warn';
+            });
+    }
+
+    function updateToolbar() {
+        document.getElementById('toolbarTitle').textContent = (paperMeta && paperMeta.title) || '试卷预览';
+        document.getElementById('toolbarMeta').textContent =
+            (paperMeta.subject || '') + ' | ' + (paperMeta.grade || '') + ' | ' + (paperMeta.region || '');
+        if (paperMeta.difficulty && document.getElementById('globalDifficulty')) {
+            document.getElementById('globalDifficulty').value = String(paperMeta.difficulty);
+        }
+    }
+
+    // ==================== 核心渲染 ====================
+    function renderPaper() {
+        if (!paperData || paperData.length === 0) { showEmpty(); return; }
+
+        var questions = paperData;
+        var meta = paperMeta || {};
+        var totalQuestions = questions.length;
+
+        // 按题型分组
+        var typeOrder = ['choice', 'fill_blank', 'true_false', 'short_answer', 'calculation', 'essay'];
+        var groups = {};
+        questions.forEach(function(q) {
+            var t = q.type || 'short_answer';
+            if (!groups[t]) groups[t] = [];
+            groups[t].push(q);
+        });
+
+        var sections = [];
+        typeOrder.forEach(function(t) {
+            if (groups[t]) {
+                var perScore = SCORE_MAP[t] || 5;
+                sections.push({
+                    label: TYPE_LABELS[t] || t, type: t,
+                    questions: groups[t],
+                    perScore: perScore,
+                    totalScore: groups[t].length * perScore
+                });
+            }
+        });
+        var totalScore = sections.reduce(function(s, sec) { return s + sec.totalScore; }, 0);
+
+        // ======== 将题目分配至两页 ========
+        // 计算每页理想的题目高度（按题目类型估算）
+        var typeHeights = { choice: 3, fill_blank: 3, true_false: 2, short_answer: 7, calculation: 8, essay: 12 };
+        var totalHeight = questions.reduce(function(s, q) { return s + (typeHeights[q.type] || 5); }, 0);
+        var headerHeight = 18; // 卷头+密封线+分数表
+        var perPageCapacity = Math.floor((totalHeight + headerHeight * 2) / 2);
+
+        // 分配题目到两页
+        var page1 = [], page2 = [];
+        var curHeight = headerHeight;
+        var useFirstPage = true;
+
+        questions.forEach(function(q) {
+            var h = typeHeights[q.type || 'short_answer'] || 5;
+            if (useFirstPage && (curHeight + h > perPageCapacity) && page1.length >= Math.floor(totalQuestions / 3)) {
+                useFirstPage = false;
+                curHeight = headerHeight;
+            }
+            if (useFirstPage) {
+                page1.push(q);
+                curHeight += h;
+            } else {
+                page2.push(q);
+                curHeight += h;
+            }
+        });
+
+        // 如果第二页太少，从第一页移一些过去
+        if (page2.length < 2 && page1.length > totalQuestions / 2 + 1) {
+            var moveCount = Math.max(2, Math.floor(totalQuestions / 3));
+            page2 = page1.splice(page1.length - moveCount, moveCount).concat(page2);
+        }
+
+        // 重新按题型分组页码
+        function buildSectionsForPage(qs) {
+            var g = {};
+            qs.forEach(function(q) {
+                var t = q.type || 'short_answer';
+                if (!g[t]) g[t] = [];
+                g[t].push(q);
+            });
+            var secs = [];
+            typeOrder.forEach(function(t) {
+                if (g[t]) {
+                    var ps = SCORE_MAP[t] || 5;
+                    secs.push({ label: TYPE_LABELS[t] || t, type: t, questions: g[t], perScore: ps, totalScore: g[t].length * ps });
+                }
+            });
+            return secs;
+        }
+
+        var page1Sections = buildSectionsForPage(page1);
+        var page2Sections = buildSectionsForPage(page2);
+
+        // ======== 渲染 HTML ========
+        function buildPageHTML(pageNum, pageQs, pageSections, isFirstPage) {
+            var h = '';
+            var qIndex = isFirstPage ? 0 : page1.length;
+
+            // 卷头（仅首页）
+            if (isFirstPage) {
+                h += '<div class="paper-header">';
+                h += '<h1>' + esc(meta.title || '模拟试卷') + '</h1>';
+                h += '<div class="subtitle">' + esc(meta.subject || '') + '试卷';
+                if (meta.region) h += '（' + esc(meta.region) + '专用）';
+                h += '</div>';
+                h += '<div class="meta">';
+                h += '<span>满分: ' + (meta.total_score || totalScore) + ' 分</span>';
+                h += '<span>时间: ' + (meta.duration_minutes || 90) + ' 分钟</span>';
+                h += '<span>年级: ' + esc(meta.grade || '') + '</span>';
+                h += '</div></div>';
+
+                // 密封线
+                h += '<div class="seal-row">';
+                h += '<span class="seal-item">姓名：<span class="seal-blank"></span></span>';
+                h += '<span class="seal-item">准考证号：<span class="seal-blank"></span></span>';
+                h += '<span class="seal-item">总分：</span>';
+                h += '<span class="seal-item">得分：</span>';
+                h += '</div>';
+            }
+
+            // 分数表（仅首页）
+            if (isFirstPage) {
+                h += '<table class="score-table"><tr><th>题型</th>';
+                var allSections = page1Sections.concat(page2Sections);
+                // 合并同类型
+                var merged = {};
+                allSections.forEach(function(s) {
+                    if (!merged[s.type]) merged[s.type] = s;
+                    else { merged[s.type].totalScore += s.totalScore; merged[s.type].questions = merged[s.type].questions.concat(s.questions); }
+                });
+                Object.values(merged).forEach(function(s) { h += '<th>' + esc(s.label) + '</th>'; });
+                h += '<th>总分</th></tr><tr><td>得分</td>';
+                Object.values(merged).forEach(function() { h += '<td class="score-cell"></td>'; });
+                h += '<td class="score-cell"></td></tr></table>';
+            }
+
+            // 各题型
+            pageSections.forEach(function(sec) {
+                h += '<div class="section">';
+                h += '<div class="section-title">' + esc(sec.label);
+                h += '<span class="score-hint">（共 ' + sec.questions.length + ' 题，每题 ' + sec.perScore + ' 分，合计 ' + sec.totalScore + ' 分）</span></div>';
+
+                sec.questions.forEach(function(q) {
+                    qIndex++;
+                    var origIdx = paperData.indexOf(q);
+                    var diffLabel = DIFF_LABELS[q.difficulty] || '中等';
+                    var diffCls = DIFF_CLASS[q.difficulty] || 'diff-medium';
+                    var isChoice = q.type === 'choice';
+                    var isEssay = q.type === 'essay';
+                    var isCalc = q.type === 'calculation';
+
+                    var areaClass = isEssay ? 'xlarge' : (isCalc ? 'large' : '');
+
+                    h += '<div class="question" data-orig-index="' + origIdx + '">';
+                    h += '<span class="q-num">' + qIndex + '.</span>';
+                    h += '<span class="q-text">' + esc(q.text || q.question_text || '') + '</span>';
+                    h += '<span class="q-score">（' + (sec.perScore) + '分）</span>';
+
+                    if (isChoice && q.options && q.options.length) {
+                        h += '<div class="options">';
+                        q.options.forEach(function(opt) {
+                            h += '<span class="opt">' + esc(typeof opt === 'string' ? opt : (opt.label ? opt.label + '. ' + opt.text : opt)) + '</span>';
+                        });
+                        h += '</div>';
+                    } else if (q.type === 'fill_blank') {
+                        h += '<div class="answer-area"></div>';
+                    } else {
+                        h += '<div class="answer-area ' + areaClass + '"></div>';
+                    }
+
+                    // 操作按钮行
+                    h += '<div class="question-actions">';
+                    h += '<span class="difficulty-badge ' + diffCls + '">' + diffLabel + '</span>';
+                    h += '<select class="q-diff-select" data-orig-index="' + origIdx + '" onchange="changeQuestionDifficulty(this)">';
+                    [1,2,3,4,5].forEach(function(d) {
+                        h += '<option value="' + d + '"' + (q.difficulty === d ? ' selected' : '') + '>' + DIFF_LABELS[d] + '</option>';
+                    });
+                    h += '</select>';
+                    h += '<button onclick="replaceQuestion(' + origIdx + ')">替换</button>';
+                    h += '<button class="danger" onclick="deleteQuestion(' + origIdx + ')">删除</button>';
+                    h += '</div>';
+                    h += '</div>';
+                });
+                h += '</div>';
+            });
+
+            // 页码
+            if (!isFirstPage) {
+                h += '<div style="text-align:center;margin-top:8px;font-size:11px;color:#888;">第 ' + pageNum + ' 页</div>';
+            } else {
+                h += '<div style="text-align:center;margin-top:8px;font-size:11px;color:#888;">第 ' + pageNum + ' 页 / 共 2 页</div>';
+            }
+
+            return h;
+        }
+
+        // 组装两页
+        var html = '<div class="paper-page" id="page1">' + buildPageHTML(1, page1, page1Sections, true) + '</div>';
+        if (page2.length > 0) {
+            html += '<div class="paper-page" id="page2">' + buildPageHTML(2, page2, page2Sections, false) + '</div>';
+        }
+
+        wrapper.innerHTML = html;
+        pageInd.style.display = 'block';
+        pageInd.textContent = '第 1 页 / 共 ' + (page2.length > 0 ? '2' : '1') + ' 页';
+    }
+
+    // ==================== 微调操作 ====================
+    window.replaceQuestion = function(origIdx) {
+        if (!paperData || origIdx >= paperData.length) return;
+        var qDiv = document.querySelector('[data-orig-index="' + origIdx + '"]');
+        if (qDiv) qDiv.classList.add('replacing');
+        var q = paperData[origIdx], meta = paperMeta || {};
+        var body = {
+            subject: meta.subject || 'math', knowledge_points: meta.knowledge_points || [],
+            difficulty: q.difficulty || meta.difficulty || 3,
+            question_index: origIdx, current_type: q.type || 'short_answer'
+        };
+        if (apiAvailable) {
+            fetch(API_BASE + '/api/replace_question', {
+                method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)
+            }).then(function(r){ return r.json(); }).then(function(resp){
+                var newQ = resp.question; newQ.difficulty = body.difficulty;
+                paperData[origIdx] = newQ; renderPaper(); flashStatus('已替换');
+            }).catch(function(){ doLocalReplace(origIdx, body.difficulty); });
+        } else { setTimeout(function(){ doLocalReplace(origIdx, body.difficulty); }, 300); }
+    };
+
+    function doLocalReplace(origIdx, difficulty) {
+        if (!paperData || origIdx >= paperData.length) return;
+        var candidates = paperData.filter(function(_, i) { return i !== origIdx; });
+        if (!candidates.length) return;
+        var src = candidates[Math.floor(Math.random() * candidates.length)];
+        var clone = JSON.parse(JSON.stringify(src));
+        clone.text = (clone.text || clone.question_text || '') + '（替换）';
+        clone.difficulty = difficulty;
+        paperData[origIdx] = clone;
+        renderPaper(); flashStatus('已本地替换');
+    }
+
+    window.changeQuestionDifficulty = function(selectEl) {
+        var origIdx = parseInt(selectEl.getAttribute('data-orig-index'), 10);
+        var newDiff = parseInt(selectEl.value, 10);
+        if (!paperData || origIdx >= paperData.length) return;
+        paperData[origIdx].difficulty = newDiff;
+        var qDiv = document.querySelector('[data-orig-index="' + origIdx + '"]');
+        if (qDiv) {
+            var badge = qDiv.querySelector('.difficulty-badge');
+            if (badge) {
+                badge.textContent = DIFF_LABELS[newDiff] || '中等';
+                badge.className = 'difficulty-badge ' + (DIFF_CLASS[newDiff] || 'diff-medium');
+            }
+        }
+        flashStatus('难度已更新');
+    };
+
+    window.deleteQuestion = function(origIdx) {
+        if (!paperData || paperData.length <= 1) { flashStatus('至少保留一道题', true); return; }
+        paperData.splice(origIdx, 1); renderPaper(); flashStatus('已删除');
+    };
+
+    window.regeneratePaper = function() {
+        var btn = document.getElementById('btnRegen');
+        btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>生成中...';
+        var meta = paperMeta || {};
+        var diffEl = document.getElementById('globalDifficulty');
+        var difficulty = diffEl ? parseInt(diffEl.value, 10) : (meta.difficulty || 3);
+        var body = {
+            subject: meta.subject || 'math', grade: meta.grade || 'grade_8',
+            region: meta.region || '', knowledge_points: meta.knowledge_points || [],
+            difficulty: difficulty, num_questions: (paperData && paperData.length) || 5
+        };
+        function done(){ btn.disabled = false; btn.textContent = '重新生成'; }
+        if (apiAvailable) {
+            fetch(API_BASE + '/api/generate_paper', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) })
+                .then(function(r){ return r.json(); }).then(function(resp){
+                    meta.difficulty = difficulty; setPaperData(resp.questions, meta); flashStatus('已重新生成'); done();
+                }).catch(function(){ doLocalRegen(body); done(); });
+        } else { setTimeout(function(){ doLocalRegen(body); done(); }, 400); }
+    };
+
+    function doLocalRegen(body) {
+        if (!paperData) return;
+        var shuffled = paperData.slice().sort(function(){ return Math.random() - 0.5; });
+        shuffled.forEach(function(q){ q.text = (q.text||q.question_text||'').replace(/（替换）|（重新排序）/g,'') + '（重新排序）'; q.difficulty = body.difficulty; });
+        var meta = paperMeta || {}; meta.difficulty = body.difficulty;
+        setPaperData(shuffled, meta); flashStatus('已本地重新生成');
+    }
+
+    window.downloadPDF = function() {
+        var btn = document.getElementById('btnPdf');
+        btn.textContent = '准备打印...'; btn.disabled = true;
+        setTimeout(function(){ window.print(); btn.textContent = '下载 PDF'; btn.disabled = false; }, 200);
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var sel = document.getElementById('globalDifficulty');
+        if (sel) sel.addEventListener('change', function(){ regeneratePaper(); });
+    });
+
+    // ==================== 工具函数 ====================
+    function esc(s) {
+        if (!s) return '';
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    function flashStatus(msg, isError) {
+        var el = document.createElement('div');
+        el.textContent = msg;
+        el.style.cssText = 'position:fixed;top:60px;right:20px;padding:8px 18px;border-radius:4px;font-size:13px;z-index:999;transition:opacity .3s;' +
+            (isError ? 'background:#fee2e2;color:#991b1b;' : 'background:#16a34a;color:#fff;');
+        document.body.appendChild(el);
+        setTimeout(function(){ el.style.opacity='0'; }, 1200);
+        setTimeout(function(){ el.remove(); }, 1500);
+    }
+    function showEmpty() {
+        wrapper.innerHTML = '<div class="empty-state"><h2>暂无试卷数据</h2><p>请先返回 <a href="index.html">配置页面</a> 生成试卷</p></div>';
+    }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1 @@
+{"name": "测试检索", "run_type": "retriever", "inputs": "{'query': '一元一次方程'}", "outputs": "{'count': 3, 'ids': ['q1', 'q2', 'q3']}", "elapsed_ms": 11.5, "tags": ["test"]}

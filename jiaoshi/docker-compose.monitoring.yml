@@ -1,0 +1,76 @@
+# ============================================================
+# 监控栈 — Prometheus + Grafana
+# ============================================================
+# 启动:
+#   docker-compose -f docker-compose.monitoring.yml up -d
+# 访问:
+#   Prometheus: http://localhost:9090
+#   Grafana:    http://localhost:3000 (admin/admin)
+# ============================================================
+
+version: "3.9"
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.50.0
+    container_name: exam-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./scripts/ci/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=30d"
+      - "--storage.tsdb.retention.size=5GB"
+    restart: unless-stopped
+    networks:
+      - monitoring-network
+
+  grafana:
+    image: grafana/grafana:10.3.0
+    container_name: exam-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+      - GF_SERVER_ROOT_URL=http://localhost:3000
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./scripts/ci/grafana_datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+      - ./scripts/ci/grafana_dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml:ro
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - monitoring-network
+
+  # 可选：Node Exporter（主机指标）
+  node_exporter:
+    image: prom/node-exporter:v1.7.0
+    container_name: exam-node-exporter
+    ports:
+      - "9100:9100"
+    command:
+      - "--collector.disable-defaults"
+      - "--collector.cpu"
+      - "--collector.meminfo"
+      - "--collector.diskstats"
+      - "--collector.netdev"
+    restart: unless-stopped
+    profiles:
+      - full
+    networks:
+      - monitoring-network
+
+volumes:
+  prometheus_data:
+    name: exam_prometheus_data
+  grafana_data:
+    name: exam_grafana_data
+
+networks:
+  monitoring-network:
+    driver: bridge

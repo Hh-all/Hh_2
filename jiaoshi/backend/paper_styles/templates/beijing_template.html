@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>{{ paper.title }}</title>
+<style>
+    /* ===== 北京卷试卷样式 =====
+       风格特点：传统文化底蕴，红色系配色，仿古籍排版风格
+    */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+        font-family: {{ style.font_family | default('"KaiTi", "楷体", "SimSun", "宋体", serif') }};
+        font-size: {{ style.font_size | default('15pt') }};
+        line-height: 2.2;
+        color: #2c1810;
+        padding: 48px 56px;
+        background: linear-gradient(180deg, #fefefe 0%, #fdf8f3 100%);
+    }
+
+    .paper {
+        max-width: 210mm;
+        margin: 0 auto;
+        border: 1px solid #d4c5b2;
+        padding: 36px 40px;
+        background: #fffef9;
+        box-shadow: 0 2px 8px rgba(139,0,0,0.06);
+    }
+
+    /* -- 试卷头（北京特色：双线框 + 印章风格标题） -- */
+    .paper-header {
+        text-align: center;
+        margin-bottom: 28px;
+        padding: 18px 0;
+        border-top: 3px double {{ style.header_color | default('#8b0000') }};
+        border-bottom: 3px double {{ style.header_color | default('#8b0000') }};
+        position: relative;
+    }
+    .paper-title {
+        font-family: "STKaiti", "楷体", "KaiTi", serif;
+        font-size: 22pt;
+        font-weight: bold;
+        letter-spacing: 4px;
+        color: {{ style.header_color | default('#8b0000') }};
+        margin-bottom: 6px;
+    }
+    .paper-subtitle {
+        font-size: 11pt;
+        color: #8b7355;
+        letter-spacing: 2px;
+    }
+    /* 红色竖排装饰 - 北京卷特色 */
+    .header-decoration {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: linear-gradient(180deg, {{ style.accent_color | default('#c41e3a') }}, transparent);
+        border-radius: 2px;
+    }
+
+    /* -- 密封线（北京特色：红色边框） -- */
+    .seal-line {
+        border: 2px solid {{ style.accent_color | default('#c41e3a') }};
+        padding: 14px 18px;
+        margin-bottom: 28px;
+        display: flex;
+        justify-content: space-between;
+        font-size: 11pt;
+        background: #fff9f9;
+        border-radius: 3px;
+    }
+    .seal-line span {
+        white-space: nowrap;
+        color: #5c3a2e;
+    }
+
+    /* -- 附加区：古诗文默写 -- */
+    .extra-section {
+        margin-bottom: 24px;
+        padding: 14px 18px;
+        background: #fdf6f0;
+        border: 1px solid #e8d5c4;
+        border-radius: 4px;
+        border-left: 4px solid {{ style.accent_color | default('#c41e3a') }};
+    }
+    .extra-section h3 {
+        font-family: "STKaiti", "楷体", serif;
+        font-size: 14pt;
+        color: {{ style.header_color | default('#8b0000') }};
+        margin-bottom: 6px;
+    }
+    .extra-section .extra-desc {
+        font-size: 10pt;
+        color: #a0806e;
+        margin-bottom: 8px;
+    }
+
+    /* -- 大题区 -- */
+    .section {
+        margin-bottom: 26px;
+        page-break-inside: avoid;
+    }
+    .section-title {
+        font-family: "STKaiti", "楷体", serif;
+        font-size: 15pt;
+        font-weight: bold;
+        padding: 6px 0 6px 8px;
+        margin-bottom: 12px;
+        color: {{ style.header_color | default('#8b0000') }};
+        border-left: 4px solid {{ style.accent_color | default('#c41e3a') }};
+        background: linear-gradient(90deg, #fff5f5, transparent);
+    }
+
+    /* -- 题目 -- */
+    .question {
+        margin: 14px 0;
+        padding: 6px 0 6px 10px;
+        border-bottom: 1px dotted #e8d5c4;
+    }
+    .question:last-child {
+        border-bottom: none;
+    }
+    .question-number {
+        font-weight: bold;
+        margin-right: 6px;
+        color: {{ style.header_color | default('#8b0000') }};
+    }
+    .question-text {
+        display: inline;
+    }
+    .question-score {
+        color: #aaa;
+        font-size: 10pt;
+        margin-left: 6px;
+    }
+
+    /* -- 选项 -- */
+    .options {
+        margin: 8px 0 4px 28px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4px;
+    }
+    .option {
+        padding: 2px 4px;
+    }
+
+    /* -- 答题区（北京特色：竖排线） -- */
+    .answer-area {
+        margin-top: 8px;
+        padding: 8px 14px;
+        background: #fefefe;
+        border: 1px solid #e8d5c4;
+        border-radius: 2px;
+        min-height: 40px;
+        background-image: repeating-linear-gradient(
+            transparent, transparent 31px, #f0e6d8 31px, #f0e6d8 32px
+        );
+    }
+    .answer-hint {
+        color: #c4a882;
+        font-size: 10pt;
+        font-style: italic;
+    }
+
+    .paper-footer {
+        text-align: center;
+        margin-top: 36px;
+        padding-top: 12px;
+        border-top: 1px solid #d4c5b2;
+        font-size: 10pt;
+        color: #a09080;
+    }
+</style>
+</head>
+<body>
+<div class="paper">
+
+    <div class="paper-header">
+        <div class="header-decoration"></div>
+        <h1 class="paper-title">{{ paper.title }}</h1>
+        {% if paper.subtitle %}
+        <p class="paper-subtitle">{{ paper.subtitle }}</p>
+        {% endif %}
+    </div>
+
+    <div class="seal-line">
+        <span>姓名：______________</span>
+        <span>准考证号：______________</span>
+        <span>总分：{{ paper.total_score }}分</span>
+        <span>时间：{{ paper.time_limit_minutes }}分钟</span>
+    </div>
+
+    {% for section in paper.sections %}
+    <div class="section">
+        <h2 class="section-title">
+            {{ section.section_title }}
+            <span style="font-size:10pt;font-weight:normal;color:#a0806e;">
+                （共{{ section.questions|length }}题，每题{{ section.score_per_question }}分，合计{{ section.total_score }}分）
+            </span>
+        </h2>
+
+        {% if section.description %}
+        <p style="color:#8b7355;font-size:10pt;margin-bottom:8px;">{{ section.description }}</p>
+        {% endif %}
+
+        {% for q in section.questions %}
+        <div class="question">
+            <p>
+                <span class="question-number">{{ q.sequence_number }}.</span>
+                <span class="question-text">{{ q.question_text }}</span>
+                <span class="question-score">({{ q.score }}分)</span>
+            </p>
+
+            {% if q.options %}
+            <div class="options">
+                {% for opt in q.options %}
+                <span class="option">{{ opt.label }}. {{ opt.text }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if q.question_type not in ('choice',) %}
+            <div class="answer-area">
+                {% if q.question_type == 'essay' %}
+                <p class="answer-hint">（作文答题区）</p>
+                <div style="height:200px;"></div>
+                {% elif q.question_type == 'calculation' %}
+                <p class="answer-hint">（解题过程）</p>
+                <div style="height:80px;"></div>
+                {% else %}
+                <div style="height:40px;"></div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+
+    <div class="paper-footer">
+        北京市 · {{ paper.subtitle }} · 智能试卷生成系统
+    </div>
+
+</div>
+</body>
+</html>

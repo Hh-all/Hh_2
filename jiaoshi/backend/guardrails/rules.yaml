@@ -1,0 +1,168 @@
+# ==========================================================================
+# 护栏规则清单 (Guardrail Rules)
+# ==========================================================================
+# 每条规则包含：
+#   id:          唯一标识
+#   description: 规则描述
+#   severity:    BLOCKER（阻断操作）| WARNING（警告但允许继续）
+#   scope:       适用范围（global / agent_name / phase_name）
+#   check:       检查类型
+#   threshold:   阈值（如适用）
+#   message:     违反时的错误消息
+#
+# 设计原则（Ratchet Principle）：
+#   每条 Rule 都对应一次真实踩坑。不凭空预设，不堆砌无效约束。
+#   规则只增不减——发现一个新的失败模式，就加一条规则。
+# ==========================================================================
+
+rules:
+  # ------------------------------------------------------------------
+  # RULE-001: 禁止直接修改 RAG 知识库原始数据
+  # ------------------------------------------------------------------
+  - id: RULE-001
+    description: "禁止直接修改 RAG 知识库原始数据（只能通过 VectorStoreManager CRUD 接口）"
+    severity: BLOCKER
+    scope: [global, DataImporter, RAGIndexer, PaperAssembler]
+    check: file_access_pattern
+    patterns:
+      deny_direct_write:
+        - "data/processed/questions.jsonl"
+        - "data/chroma_db/**"
+        - "data/knowledge_graph.json"
+      allowed_api:
+        - "backend/knowledge/vector_store.py"
+    message: "禁止直接修改原始数据文件。请使用 VectorStoreManager CRUD 接口。"
+
+  # ------------------------------------------------------------------
+  # RULE-002: 禁止调用外部未授权的 API
+  # ------------------------------------------------------------------
+  - id: RULE-002
+    description: "禁止调用外部未授权的 API（只允许配置中的白名单）"
+    severity: BLOCKER
+    scope: [global]
+    check: api_whitelist
+    whitelist:
+      - "api.anthropic.com"
+      - "api.openai.com"
+      - "open.xkw.com"
+      - "api.smith.langchain.com"
+      - "huggingface.co"
+      - "localhost"
+      - "127.0.0.1"
+    message: "禁止调用未授权的 API 端点。请检查 API 白名单。"
+
+  # ------------------------------------------------------------------
+  # RULE-003: 禁止生成包含敏感内容的题目
+  # ------------------------------------------------------------------
+  - id: RULE-003
+    description: "禁止生成包含敏感内容的题目（政治敏感、色情、暴力、歧视等）"
+    severity: BLOCKER
+    scope: [QAGenerator, PaperAssembler]
+    check: content_filter
+    forbidden_patterns:
+      # 政治敏感
+      - "台独|藏独|疆独|港独|法轮功|六四|天安门事件"
+      # 色情低俗
+      - "色情|淫秽|裸体|性交|强奸|猥亵"
+      # 暴力恐怖
+      - "恐怖袭击|炸弹制作|杀人方法|自杀教程|毒品制作"
+      # 歧视仇恨
+      - "种族歧视|性别歧视|地域歧视|宗教仇恨"
+      # 违法信息
+      - "黑客|破解|盗版|洗钱|诈骗|传销"
+    message: "题目包含禁止的敏感内容。请修改后重试。"
+
+  # ------------------------------------------------------------------
+  # RULE-004: 每道题必须包含答案和解析
+  # ------------------------------------------------------------------
+  - id: RULE-004
+    description: "每道题必须包含答案（answer）和解析（analysis），缺一不可"
+    severity: BLOCKER
+    scope: [QAGenerator, PaperAssembler, PaperFormatter]
+    check: required_fields
+    required_fields:
+      - answer
+      - analysis
+    min_answer_length: 1
+    message: "题目缺少必填字段 answer 或 analysis。"
+
+  # ------------------------------------------------------------------
+  # RULE-005: 试卷总分一致性
+  # ------------------------------------------------------------------
+  - id: RULE-005
+    description: "生成的试卷总分必须与用户设定的总分一致（容差 ±2 分）"
+    severity: BLOCKER
+    scope: [PaperAssembler, PaperFormatter]
+    check: score_validation
+    tolerance: 2
+    message: "试卷总分与预期不一致。请检查分值分配。"
+
+  # ------------------------------------------------------------------
+  # RULE-006: 单次检索结果上限
+  # ------------------------------------------------------------------
+  - id: RULE-006
+    description: "单次检索最多返回 50 条结果，防止资源过载"
+    severity: BLOCKER
+    scope: [QuestionRetriever, RAGIndexer]
+    check: result_limit
+    max_retrieval_count: 50
+    message: "检索结果超过上限 50 条。请缩小检索范围或增加过滤条件。"
+
+  # ------------------------------------------------------------------
+  # RULE-007: 题型与选项一致性
+  # ------------------------------------------------------------------
+  - id: RULE-007
+    description: "选择题（choice）必须有至少 2 个选项（options），非选择题不应有选项"
+    severity: BLOCKER
+    scope: [QAGenerator, PaperAssembler]
+    check: type_option_consistency
+    message: "题型与选项不一致。选择题必须有 ≥2 个选项。"
+
+  # ------------------------------------------------------------------
+  # RULE-008: 知识标签有效性
+  # ------------------------------------------------------------------
+  - id: RULE-008
+    description: "知识点标签（knowledge_tags）必须非空，且优先来自知识图谱"
+    severity: WARNING
+    scope: [QAGenerator, PaperAssembler]
+    check: knowledge_tags_valid
+    min_tags: 1
+    message: "知识点标签为空，请添加至少一个有效标签。"
+
+  # ------------------------------------------------------------------
+  # RULE-009: 难度值合法性
+  # ------------------------------------------------------------------
+  - id: RULE-009
+    description: "难度值必须在 1-5 范围内"
+    severity: BLOCKER
+    scope: [PaperPlanner, QAGenerator, PaperAssembler]
+    check: difficulty_range
+    min_difficulty: 1
+    max_difficulty: 5
+    message: "难度值超出 1-5 范围。"
+
+  # ------------------------------------------------------------------
+  # RULE-010: 地域标签有效性
+  # ------------------------------------------------------------------
+  - id: RULE-010
+    description: "地域标签必须在已知地域列表中"
+    severity: WARNING
+    scope: [PaperPlanner, PaperAssembler]
+    check: region_valid
+    valid_regions: ["beijing", "shanghai", "guangdong", ""]
+    message: "地域标签不在已知列表中，可能影响地域适配。"
+
+# ==========================================================================
+# 全局配置
+# ==========================================================================
+config:
+  # 违反 BLOCKER 后的动作
+  on_blocker: "reject_and_log"
+  # 违反 WARNING 后的动作
+  on_warning: "log_and_continue"
+  # 护栏日志路径
+  log_path: "logs/guardrail_violations.log"
+  # 是否启用护栏检查
+  enabled: true
+  # 连续违反上限（超过则进入 FATAL）
+  max_consecutive_violations: 5

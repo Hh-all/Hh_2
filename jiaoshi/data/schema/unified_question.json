@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "统一试题数据模型",
+  "description": "智能试卷生成系统的统一试题格式，所有外部数据源导入后均转换为此格式",
+  "type": "object",
+  "required": [
+    "id",
+    "subject",
+    "grade",
+    "grade_level",
+    "knowledge_tags",
+    "difficulty",
+    "question_type",
+    "question_text",
+    "answer",
+    "source"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "全局唯一标识，格式为 {来源前缀}_{原始ID}，如 xkw_12345、cmmath_00014"
+    },
+    "subject": {
+      "type": "string",
+      "enum": ["math", "chinese", "english", "physics", "chemistry", "biology", "history", "geography", "politics"],
+      "description": "学科代码，与系统 schema.json 中 subjects.items[].id 对应"
+    },
+    "grade": {
+      "type": "string",
+      "pattern": "^grade_(1[0-2]|[1-9])$",
+      "description": "年级标识，grade_1 至 grade_12"
+    },
+    "grade_level": {
+      "type": "string",
+      "enum": ["primary", "junior", "senior"],
+      "description": "学段：primary(小学1-6) / junior(初中7-9) / senior(高中10-12)"
+    },
+    "region": {
+      "type": "string",
+      "description": "地域代码，与系统 schema.json 中 regions.items[].code 对应。无地域信息时为空字符串",
+      "default": ""
+    },
+    "knowledge_tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "description": "知识点标签数组，标签需映射到 data/knowledge_graph.json 中的标准知识点名称"
+    },
+    "difficulty": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5,
+      "description": "难度等级：1(容易) / 2(较易) / 3(中等) / 4(较难) / 5(困难)"
+    },
+    "question_type": {
+      "type": "string",
+      "enum": ["choice", "fill_blank", "true_false", "short_answer", "essay", "calculation"],
+      "description": "题型代码，与系统 schema.json 中 question_types.items[].code 对应"
+    },
+    "question_text": {
+      "type": "string",
+      "minLength": 1,
+      "description": "题干文本（纯文本或含 LaTeX 公式）"
+    },
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": { "type": "string", "description": "选项标签，如 A/B/C/D" },
+          "text": { "type": "string", "description": "选项内容" }
+        },
+        "required": ["label", "text"]
+      },
+      "description": "选择题的选项数组，非选择题可为空数组"
+    },
+    "answer": {
+      "type": "string",
+      "minLength": 1,
+      "description": "标准答案"
+    },
+    "analysis": {
+      "type": "string",
+      "description": "题目解析 / 解题步骤，无解析时为空字符串",
+      "default": ""
+    },
+    "source": {
+      "type": "string",
+      "description": "数据来源标识，如 juhe / xkw / cnopendata / 360tiku / nbsdc / cmmath / eduadapt / edueval / mock"
+    },
+    "year": {
+      "type": "integer",
+      "minimum": 2000,
+      "maximum": 2099,
+      "description": "试题年份（可选），如 2024"
+    },
+    "_import_meta": {
+      "type": "object",
+      "description": "导入元数据（内部使用，不参与RAG检索）",
+      "properties": {
+        "imported_at": { "type": "string", "format": "date-time" },
+        "original_id": { "type": "string" },
+        "original_tags": { "type": "array", "items": { "type": "string" } },
+        "original_difficulty": { "type": "string" },
+        "tag_mapping_confidence": { "type": "number" },
+        "region_source": { "type": "string", "enum": ["original", "inferred", "none"] }
+      }
+    }
+  }
+}

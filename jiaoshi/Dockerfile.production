@@ -1,0 +1,59 @@
+# ==========================================================================
+# 多阶段生产构建
+# Stage 1: 构建依赖
+# Stage 2: 生产运行时
+# ==========================================================================
+
+# ---- Stage 1: Builder ----
+FROM python:3.11-slim-bookworm AS builder
+
+WORKDIR /build
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc g++ cmake build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir --user -r requirements.txt
+
+# ---- Stage 2: Production ----
+FROM python:3.11-slim-bookworm
+
+LABEL maintainer="exam-paper-generator"
+LABEL description="智能试卷生成系统"
+
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PIP_NO_CACHE_DIR=1
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# 运行时依赖
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgomp1 curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# 创建非 root 用户
+RUN useradd --create-home --shell /bin/bash appuser
+
+# 复制 Python 依赖
+COPY --from=builder /root/.local /home/appuser/.local
+ENV PATH=/home/appuser/.local/bin:$PATH
+
+# 应用代码
+WORKDIR /app
+COPY --chown=appuser:appuser . .
+
+# 创建必要目录
+RUN mkdir -p /app/data/processed /app/data/chroma_db /app/data/cache \
+    /app/logs /app/tmp /app/test_reports /app/output \
+    && chown -R appuser:appuser /app
+
+USER appuser
+
+# 健康检查
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:5000/api/health || exit 1
+
+EXPOSE 5000
+
+# 默认启动 Flask
+CMD ["python", "-m", "flask", "--app", "backend/server.py", "run", "--host=0.0.0.0", "--port=5000"]

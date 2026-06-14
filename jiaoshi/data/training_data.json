@@ -1,0 +1,677 @@
+[
+  {
+    "id": 1,
+    "subject": "math",
+    "grade": "grade_7",
+    "region": "shanghai",
+    "knowledge_tags": [
+      "代数",
+      "一元一次方程"
+    ],
+    "difficulty": 1,
+    "question_text": "解方程：x + 5 = 12",
+    "answer": "x = 7",
+    "analysis": "移项：x = 12 - 5 = 7"
+  },
+  {
+    "id": 2,
+    "subject": "math",
+    "grade": "grade_6",
+    "region": "guangdong",
+    "knowledge_tags": [
+      "代数",
+      "一元一次方程"
+    ],
+    "difficulty": 2,
+    "question_text": "解方程：3x - 7 = 2x + 5",
+    "answer": "x = 12",
+    "analysis": "移项：3x - 2x = 5 + 7，得 x = 12"
+  },
+  {
+    "id": 3,
+    "subject": "math",
+    "grade": "grade_5",
+    "region": "beijing",
+    "knowledge_tags": [
+      "代数",
+      "一元一次方程"
+    ],
+    "difficulty": 2,
+    "question_text": "一个数的3倍减去4等于这个数的2倍加上6，求这个数。",
+    "answer": "10",
+    "analysis": "设这个数为 x，则 3x - 4 = 2x + 6，解得 x = 10"
+  },
+  {
+    "id": 4,
+    "subject": "math",
+    "grade": "grade_8",
+    "region": "shanghai",
+    "knowledge_tags": [
+      "代数",
+      "一元一次方程"
+    ],
+    "difficulty": 3,
+    "question_text": "小明买了一些笔记本，每本3元，共花了21元。小明买了多少本笔记本？",
+    "answer": "7本",
+    "analysis": "设笔记本数量为 x，则 3x = 21，解得 x = 7"
+  },
+  {
+    "id": 5,
+    "subject": "math",
+    "grade": "grade_9",
+    "region": "beijing",
+    "knowledge_tags": [
+      "代数",
+      "二元一次方程组"
+    ],
+    "difficulty": 2,
+    "question_text": "解方程组：{x + y = 10, x - y = 4}",
+    "answer": "x = 7, y = 3",
+    "analysis": "两式相加得 2x = 14，x = 7；代入得 y = 3"
+  },
+  {
+    "id": 6,
+    "subject": "math",
+    "grade": "grade_8",
+    "region": "guangdong",
+    "knowledge_tags": [
+      "代数",
+      "二元一次方程组"
+    ],
+    "difficulty": 3,
+    "question_text": "甲、乙两数的和是25，甲数是乙数的4倍，求甲、乙两数。",
+    "answer": "甲 = 20, 乙 = 5",
+    "analysis": "设乙为 x，甲为 4x，则 4x + x = 25，得 x = 5，甲 = 20"
+  },
+  {
+    "id": 7,
+    "subject": "math",
+    "grade": "grade_3",
+    "region": "shanghai",
+    "knowledge_tags": [
+      "函数",
+      "一次函数"
+    ],
+    "difficulty": 2,
+    "question_text": "已知一次函数 y = kx + b 的图像经过点 (1, 3) 和 (3, 7)，求 k 和 b 的值。",
+    "answer": "k = 2, b = 1",
+    "analysis": "代入两点得：k+b=3，3k+b=7。两式相减得 2k=4，k=2；代入得 b=1"
+  },
+  {
+    "id": 8,
+    "subject": "math",
+    "grade": "grade_8",
+    "region": "guangdong",
+    "knowledge_tags": [
+      "函数",
+      "一次函数"
+    ],
+    "difficulty": 3,
+    "question_text": "一次函数 y = -2x + 5 的图像与 x 轴的交点坐标是什么？",
+    "answer": "(2.5, 0)",
+    "analysis": "令 y = 0，则 -2x + 5 = 0，解得 x = 2.5"
+  },
+  {
+    "id": 9,
+    "subject": "math",
+    "grade": "grade_7",
+    "region": "beijing",
+    "knowledge_tags": [
+      "函数",
+      "二次函数"
+    ],
+    "difficulty": 4,
+    "question_text": "抛物线 y = x^2 - 4x + 3 的顶点坐标是什么？",
+    "answer": "(2, -1)",
+    "analysis": "配方：y = (x-2)^2 - 1，顶点为 (2, -1)"
+  },
+  {
+    "id": 10,
+    "subject": "math",
+    "grade": "grade_9",
+    "region": "shanghai",
+    "knowledge_tags": [
+      "几何",
+      "三角形"
+    ],
+    "difficulty": 1,
+    "question_text": "三角形三个内角的和是多少度？",
+    "answer": "180度",
+    "analysis": "三角形内角和定理：三角形三个内角的和为180度"
+  },
+  {
+    "id": 11,
+    "subject": "math",
+    "grade": "grade_9",
+    "region": "beijing",
+    "knowledge_tags": [
+      "几何",
+      "三角形"
+    ],
+    "difficulty": 3,
+    "question_text": "在三角形ABC中，角A = 50度，角B = 60度，求角C。",
+    "answer": "70度",
+    "analysis": "角C = 180 - 角A - 角B = 180 - 50 - 60 = 70度"
+  },
+  {
+    "id": 12,
+    "subject": "math",
+    "grade": "grade_8",
+    "region": "shanghai",
+    "knowledge_tags": [
+      "几何",
+      "全等三角形"
+    ],
+    "difficulty": 3,
+    "question_text": "判定两个三角形全等的方法中，SSS表示什么？",
+    "answer": "三边对应相等的两个三角形全等",
+    "analysis": "SSS（Side-Side-Side）：如果两个三角形的三条边分别对应相等，则这两个三角形全等"
+  },
+  {
+    "id": 13,
+    "subject": "math",
+    "grade": "grade_6",
+    "region": "shanghai",
+    "knowledge_tags": [
+      "几何",
+      "勾股定理"
+    ],
+    "difficulty": 2,
+    "question_text": "在直角三角形中，两条直角边分别为3cm和4cm，斜边长多少？",
+    "answer": "5cm",
+    "analysis": "根据勾股定理：c^2 = 3^2 + 4^2 = 25，c = 5cm"
+  },
+  {
+    "id": 14,
+    "subject": "math",
+    "grade": "grade_7",
+    "region": "guangdong",
+    "knowledge_tags": [
+      "几何",
+      "勾股定理"
+    ],
+    "difficulty": 3,
+    "question_text": "一根梯子长5米，斜靠在墙上，梯子底部距墙3米，梯子顶端距地面多少米？",
+    "answer": "4米",
+    "analysis": "勾股定理：h^2 + 3^2 = 5^2，h^2 = 25 - 9 = 16，h = 4米"
+  },
+  {
+    "id": 15,
+    "subject": "math",
+    "grade": "grade_2",
+    "region": "beijing",
+    "knowledge_tags": [
+      "统计与概率"
+    ],
+    "difficulty": 1,
+    "question_text": "数据 2, 3, 5, 7, 8 的中位数是多少？",
+    "answer": "5",
+    "analysis": "将数据从小到大排列：2, 3, 5, 7, 8，中间位置的数为5"
+  },
+  {
+    "id": 16,
+    "subject": "math",
+    "grade": "grade_9",
+    "region": "guangdong",
+    "knowledge_tags": [
+      "统计与概率"
+    ],
+    "difficulty": 2,
+    "question_text": "数据 4, 6, 6, 8, 10 的众数是多少？",
+    "answer": "6",
+    "analysis": "众数是出现次数最多的数据，6出现了2次"
+  },
+  {
+    "id": 17,
+    "subject": "math",
+    "grade": "grade_4",
+    "region": "shanghai",
+    "knowledge_tags": [
+      "统计与概率"
+    ],
+    "difficulty": 2,
+    "question_text": "掷一枚均匀的骰子，出现偶数的概率是多少？",
+    "answer": "1/2",
+    "analysis": "偶数有2, 4, 6共3种，总共有6种结果，概率 = 3/6 = 1/2"
+  },
+  {
+    "id": 18,
+    "subject": "math",
+    "grade": "grade_7",
+    "region": "beijing",
+    "knowledge_tags": [
+      "统计与概率"
+    ],
+    "difficulty": 3,
+    "question_text": "一个袋子里有3个红球和2个白球，从中随机摸出一个球，摸到红球的概率是多少？",
+    "answer": "3/5",
+    "analysis": "总球数5，红球3个，概率 = 3/5"
+  },
+  {
+    "id": 19,
+    "subject": "math",
+    "grade": "grade_2",
+    "region": "beijing",
+    "knowledge_tags": [
+      "代数",
+      "分数运算"
+    ],
+    "difficulty": 1,
+    "question_text": "计算：1/2 + 1/3 = ?",
+    "answer": "5/6",
+    "analysis": "通分：1/2 = 3/6，1/3 = 2/6，3/6 + 2/6 = 5/6"
+  },
+  {
+    "id": 20,
+    "subject": "math",
+    "grade": "grade_8",
+    "region": "beijing",
+    "knowledge_tags": [
+      "代数",
+      "分数运算"
+    ],
+    "difficulty": 2,
+    "question_text": "计算：3/4 x 2/5 = ?（结果化为最简分数）",
+    "answer": "3/10",
+    "analysis": "3/4 x 2/5 = 6/20 = 3/10"
+  },
+  {
+    "id": 21,
+    "subject": "chinese",
+    "grade": "grade_9",
+    "region": "guangdong",
+    "knowledge_tags": [
+      "阅读理解"
+    ],
+    "difficulty": 2,
+    "question_text": "阅读下文，回答问题。\n春天来了，小草从土里钻出来，嫩嫩的，绿绿的。桃花开了，杏花开了，梨花也开了。红的像火，粉的像霞，白的像雪。\n\n问题：这段文字描写了什么季节？提到了哪些花？",
+    "answer": "春天；提到了桃花、杏花、梨花。",
+    "analysis": "文中明确提到春天来了；列举的花有桃花、杏花、梨花，并用了比喻的修辞手法"
+  },
+  {
+    "id": 22,
+    "subject": "chinese",
+    "grade": "grade_7",
+    "region": "shanghai",
+    "knowledge_tags": [
+      "阅读理解"
+    ],
+    "difficulty": 3,
+    "question_text": "阅读下面这段话，分析作者表达了怎样的思想感情。\n季羡林曾写道：月是故乡明。",
+    "answer": "作者表达了对故乡深深的眷恋和思念之情。月是故乡明运用了对比手法，强调故乡在作者心中无可替代的地位。",
+    "analysis": "这是一句经典名言，通过故乡的月亮最明亮这一主观感受，表达游子对家乡的深切思念"
+  },
+  {
+    "id": 23,
+    "subject": "chinese",
+    "grade": "grade_8",
+    "region": "beijing",
+    "knowledge_tags": [
+      "古诗词"
+    ],
+    "difficulty": 1,
+    "question_text": "补全诗句：床前明月光，______。",
+    "answer": "疑是地上霜",
+    "analysis": "出自李白《静夜思》"
+  },
+  {
+    "id": 24,
+    "subject": "chinese",
+    "grade": "grade_9",
+    "region": "shanghai",
+    "knowledge_tags": [
+      "古诗词"
+    ],
+    "difficulty": 2,
+    "question_text": "春蚕到死丝方尽，蜡炬成灰泪始干出自哪位诗人的哪首诗？",
+    "answer": "李商隐，《无题》",
+    "analysis": "此句以春蚕和蜡烛为喻，表达至死不渝的深情，后也用来赞美奉献精神"
+  },
+  {
+    "id": 25,
+    "subject": "chinese",
+    "grade": "grade_9",
+    "region": "guangdong",
+    "knowledge_tags": [
+      "古诗词"
+    ],
+    "difficulty": 3,
+    "question_text": "杜甫《春望》中'感时花溅泪，恨别鸟惊心'运用了什么修辞手法？有什么表达效果？",
+    "answer": "运用了拟人和移情于景的修辞手法。诗人将自身因国破家亡的悲伤情感投射到花鸟之上，仿佛花也流泪、鸟也心惊，更加深刻地表现了诗人忧国忧民的情怀。",
+    "analysis": "这两句是杜甫安史之乱期间所作，运用拟人手法，赋予自然景物以人的情感，情景交融"
+  },
+  {
+    "id": 26,
+    "subject": "chinese",
+    "grade": "grade_8",
+    "region": "shanghai",
+    "knowledge_tags": [
+      "成语"
+    ],
+    "difficulty": 1,
+    "question_text": "写出表示做事有恒心，坚持不懈的成语（至少两个）。",
+    "answer": "持之以恒、锲而不舍、坚持不懈（答出两个即可）",
+    "analysis": "成语持之以恒出自曾国藩家书，锲而不舍出自《荀子·劝学》"
+  },
+  {
+    "id": 27,
+    "subject": "chinese",
+    "grade": "grade_5",
+    "region": "shanghai",
+    "knowledge_tags": [
+      "成语"
+    ],
+    "difficulty": 2,
+    "question_text": "下列加点成语使用正确的一项是（ ）\nA. 他上课总是夸夸其谈，老师很喜欢他。\nB. 战士们英勇奋战，视死如归，令人敬佩。\nC. 这道题太难了，他完成得头头是道。",
+    "answer": "B",
+    "analysis": "A项夸夸其谈含贬义，与老师喜欢矛盾；C项头头是道形容说话有条理，不用于解题"
+  },
+  {
+    "id": 28,
+    "subject": "chinese",
+    "grade": "grade_5",
+    "region": "guangdong",
+    "knowledge_tags": [
+      "病句修改"
+    ],
+    "difficulty": 2,
+    "question_text": "修改病句：通过这次活动，使我增长了见识。",
+    "answer": "删去'通过'或'使'：这次活动使我增长了见识。或：通过这次活动，我增长了见识。",
+    "analysis": "原句缺少主语，'通过……使……'是典型的主语残缺结构"
+  },
+  {
+    "id": 29,
+    "subject": "chinese",
+    "grade": "grade_8",
+    "region": "guangdong",
+    "knowledge_tags": [
+      "病句修改"
+    ],
+    "difficulty": 3,
+    "question_text": "修改病句：我国有世界上没有的万里长城。",
+    "answer": "改为：我国有世界上独一无二的万里长城。",
+    "analysis": "原句'有世界上没有的'前后矛盾，应改为'独一无二'或'举世闻名'"
+  },
+  {
+    "id": 30,
+    "subject": "chinese",
+    "grade": "grade_7",
+    "region": "shanghai",
+    "knowledge_tags": [
+      "文言文"
+    ],
+    "difficulty": 3,
+    "question_text": "解释句中加点的字：学而时习之，不亦说乎？中的'说'是什么意思？",
+    "answer": "说通悦，愉快、高兴的意思",
+    "analysis": "这是通假字现象，说与悦古音相同，在古文中常通用"
+  },
+  {
+    "id": 31,
+    "subject": "chinese",
+    "grade": "grade_12",
+    "region": "guangdong",
+    "knowledge_tags": [
+      "文言文"
+    ],
+    "difficulty": 4,
+    "question_text": "翻译：三人行，必有我师焉。择其善者而从之，其不善者而改之。",
+    "answer": "几个人一起走路，其中必定有可以做我老师的人。选择他们的优点去学习，看到他们的缺点（如果自己也有）就加以改正。",
+    "analysis": "出自《论语·述而》，体现了孔子虚心好学和善于自省的精神"
+  },
+  {
+    "id": 32,
+    "subject": "chinese",
+    "grade": "grade_1",
+    "region": "shanghai",
+    "knowledge_tags": [
+      "作文"
+    ],
+    "difficulty": 2,
+    "question_text": "作文中总分总结构指的是什么？",
+    "answer": "总分总结构是指：开头总起全文，阐明主旨；中间分段展开论述或描写；结尾总结全文，升华主题。",
+    "analysis": "这是议论文和记叙文中最常用的结构之一，层次清晰，便于阅卷老师理解文章脉络"
+  },
+  {
+    "id": 33,
+    "subject": "english",
+    "grade": "grade_8",
+    "region": "shanghai",
+    "knowledge_tags": [
+      "词汇"
+    ],
+    "difficulty": 1,
+    "question_text": "What is the past tense of the verb 'go'?",
+    "answer": "went",
+    "analysis": "go 是一个不规则动词，过去式为 went，过去分词为 gone"
+  },
+  {
+    "id": 34,
+    "subject": "english",
+    "grade": "grade_8",
+    "region": "guangdong",
+    "knowledge_tags": [
+      "词汇"
+    ],
+    "difficulty": 1,
+    "question_text": "写出 important 的比较级和最高级形式。",
+    "answer": "more important, most important",
+    "analysis": "多音节形容词（三个或以上音节）的比较级和最高级用 more 和 most 构成"
+  },
+  {
+    "id": 35,
+    "subject": "english",
+    "grade": "grade_1",
+    "region": "guangdong",
+    "knowledge_tags": [
+      "词汇"
+    ],
+    "difficulty": 2,
+    "question_text": "Choose the correct word: There are _____ students in the classroom. (many / much)",
+    "answer": "many",
+    "analysis": "students 是可数名词复数，用 many 修饰；much 修饰不可数名词"
+  },
+  {
+    "id": 36,
+    "subject": "english",
+    "grade": "grade_6",
+    "region": "beijing",
+    "knowledge_tags": [
+      "语法",
+      "时态"
+    ],
+    "difficulty": 2,
+    "question_text": "用所给词的适当形式填空：She _____ (watch) TV when her mother came back yesterday.",
+    "answer": "was watching",
+    "analysis": "表示过去某一时刻正在进行的动作，用过去进行时 was/were + doing"
+  },
+  {
+    "id": 37,
+    "subject": "english",
+    "grade": "grade_8",
+    "region": "shanghai",
+    "knowledge_tags": [
+      "语法",
+      "时态"
+    ],
+    "difficulty": 3,
+    "question_text": "翻译：我已经做完作业了。",
+    "answer": "I have already finished my homework.",
+    "analysis": "用现在完成时 have/has + 过去分词，already 用于肯定句表示'已经'"
+  },
+  {
+    "id": 38,
+    "subject": "english",
+    "grade": "grade_7",
+    "region": "shanghai",
+    "knowledge_tags": [
+      "语法",
+      "时态"
+    ],
+    "difficulty": 3,
+    "question_text": "By the time he arrives, we _____ (wait) for two hours.",
+    "answer": "will have been waiting",
+    "analysis": "将来完成进行时，表示到将来某一时间点，某个动作已经持续了一段时间"
+  },
+  {
+    "id": 39,
+    "subject": "english",
+    "grade": "grade_5",
+    "region": "guangdong",
+    "knowledge_tags": [
+      "语法",
+      "被动语态"
+    ],
+    "difficulty": 2,
+    "question_text": "将下列句子改为被动语态：They built the bridge in 2010.",
+    "answer": "The bridge was built (by them) in 2010.",
+    "analysis": "被动语态构成：be + 过去分词。原句为一般过去时，用 was/were built"
+  },
+  {
+    "id": 40,
+    "subject": "english",
+    "grade": "grade_8",
+    "region": "beijing",
+    "knowledge_tags": [
+      "语法",
+      "被动语态"
+    ],
+    "difficulty": 3,
+    "question_text": "将下列句子改为被动语态：People say that he is a genius.",
+    "answer": "It is said that he is a genius. / He is said to be a genius.",
+    "analysis": "It is said that... 是常见句型，表示据说……"
+  },
+  {
+    "id": 41,
+    "subject": "english",
+    "grade": "grade_8",
+    "region": "beijing",
+    "knowledge_tags": [
+      "语法",
+      "从句"
+    ],
+    "difficulty": 3,
+    "question_text": "用适当的关系词填空：This is the house _____ I lived ten years ago.",
+    "answer": "where / in which",
+    "analysis": "先行词 house 在定语从句中作地点状语，用关系副词 where 或 in which"
+  },
+  {
+    "id": 42,
+    "subject": "english",
+    "grade": "grade_11",
+    "region": "beijing",
+    "knowledge_tags": [
+      "语法",
+      "从句"
+    ],
+    "difficulty": 4,
+    "question_text": "改写为含有定语从句的复合句：I met a girl. Her father is a famous writer.",
+    "answer": "I met a girl whose father is a famous writer.",
+    "analysis": "whose 在定语从句中作定语，表示所属关系，既可指人也可指物"
+  },
+  {
+    "id": 43,
+    "subject": "english",
+    "grade": "grade_9",
+    "region": "beijing",
+    "knowledge_tags": [
+      "阅读理解"
+    ],
+    "difficulty": 2,
+    "question_text": "Read the passage and answer:\nTom is a student. He gets up at 6:30 every morning. After breakfast, he goes to school by bus. School starts at 8:00.\n\nQuestion: How does Tom go to school?",
+    "answer": "By bus.",
+    "analysis": "文中明确提到 he goes to school by bus"
+  },
+  {
+    "id": 44,
+    "subject": "english",
+    "grade": "grade_7",
+    "region": "beijing",
+    "knowledge_tags": [
+      "阅读理解"
+    ],
+    "difficulty": 3,
+    "question_text": "Read the passage and find the main idea:\nMany animals use colors to protect themselves. A polar bear looks white on snow. A chameleon can change its color to match its surroundings.\n\nQuestion: What is the main idea of this passage?",
+    "answer": "Animals use colors for protection (camouflage).",
+    "analysis": "段首句为主题句，后面的例子（北极熊和变色龙）都是对主题句的支撑"
+  },
+  {
+    "id": 45,
+    "subject": "english",
+    "grade": "grade_5",
+    "region": "guangdong",
+    "knowledge_tags": [
+      "写作"
+    ],
+    "difficulty": 2,
+    "question_text": "请用英语写出一封邀请信的结尾（1-2句）。",
+    "answer": "I am looking forward to your reply. / I hope you can come.",
+    "analysis": "邀请信结尾通常表达期待对方回复或希望对方参加"
+  },
+  {
+    "id": 46,
+    "subject": "math",
+    "grade": "grade_9",
+    "region": "shanghai",
+    "knowledge_tags": [
+      "统计与概率"
+    ],
+    "difficulty": 2,
+    "question_text": "数据 4, 6, 6, 8, 10 的众数是多少？（变式）",
+    "answer": "6",
+    "analysis": "众数是出现次数最多的数据，6出现了2次"
+  },
+  {
+    "id": 47,
+    "subject": "english",
+    "grade": "grade_11",
+    "region": "guangdong",
+    "knowledge_tags": [
+      "语法",
+      "从句"
+    ],
+    "difficulty": 4,
+    "question_text": "改写为含有定语从句的复合句：I met a girl. Her father is a famous writer.（变式）",
+    "answer": "I met a girl whose father is a famous writer.",
+    "analysis": "whose 在定语从句中作定语，表示所属关系，既可指人也可指物"
+  },
+  {
+    "id": 48,
+    "subject": "chinese",
+    "grade": "grade_8",
+    "region": "shanghai",
+    "knowledge_tags": [
+      "成语"
+    ],
+    "difficulty": 1,
+    "question_text": "写出表示做事有恒心，坚持不懈的成语（至少两个）。（变式）",
+    "answer": "持之以恒、锲而不舍、坚持不懈（答出两个即可）",
+    "analysis": "成语持之以恒出自曾国藩家书，锲而不舍出自《荀子·劝学》"
+  },
+  {
+    "id": 49,
+    "subject": "english",
+    "grade": "grade_11",
+    "region": "beijing",
+    "knowledge_tags": [
+      "语法",
+      "从句"
+    ],
+    "difficulty": 4,
+    "question_text": "改写为含有定语从句的复合句：I met a girl. Her father is a famous writer.（变式）（变式）",
+    "answer": "I met a girl whose father is a famous writer.",
+    "analysis": "whose 在定语从句中作定语，表示所属关系，既可指人也可指物"
+  },
+  {
+    "id": 50,
+    "subject": "english",
+    "grade": "grade_9",
+    "region": "guangdong",
+    "knowledge_tags": [
+      "阅读理解"
+    ],
+    "difficulty": 2,
+    "question_text": "Read the passage and answer:\nTom is a student. He gets up at 6:30 every morning. After breakfast, he goes to school by bus. School starts at 8:00.\n\nQuestion: How does Tom go to school?（变式）",
+    "answer": "By bus.",
+    "analysis": "文中明确提到 he goes to school by bus"
+  }
+]

@@ -1,0 +1,27 @@
+[run]
+source = backend
+omit =
+    backend/server.py
+    backend/orchestrator.py
+    */tests/*
+    */scripts/*
+    backend/tracing/*
+    */__pycache__/*
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise AssertionError
+    raise NotImplementedError
+    if __name__ == .__main__.:
+    if TYPE_CHECKING:
+    @abstractmethod
+    class .*\bProtocol\):
+    pass
+
+show_missing = True
+skip_covered = False
+
+[html]
+directory = htmlcov

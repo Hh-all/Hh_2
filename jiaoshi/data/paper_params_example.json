@@ -1,0 +1,105 @@
+{
+  "_comment": "试卷生成参数示例 - 定义一张试卷的结构、题型分布、难度比例等",
+
+  "paper_meta": {
+    "title": "2024-2025学年第一学期期中考试",
+    "subject": { "id": "math", "name": "数学" },
+    "grade": { "id": 8, "label": "八年级" },
+    "region": { "code": "beijing", "name": "北京", "syllabus": "人教版" },
+    "total_score": 100,
+    "duration_minutes": 90,
+    "difficulty_label": "中等"
+  },
+
+  "section_distribution": {
+    "_description": "各题型的分值、题量及难度分布。每道题的分值按难度比例在题型内自动分配",
+    "sections": [
+      {
+        "type": "choice",
+        "label": "选择题",
+        "count": 10,
+        "score_per_question": 3,
+        "total_score": 30,
+        "difficulty_ratio": {
+          "_hint": "难度分布比例，总和为 1.0",
+          "easy": 0.4,
+          "medium": 0.4,
+          "hard": 0.2
+        }
+      },
+      {
+        "type": "fill_blank",
+        "label": "填空题",
+        "count": 5,
+        "score_per_question": 3,
+        "total_score": 15,
+        "difficulty_ratio": {
+          "easy": 0.2,
+          "medium": 0.6,
+          "hard": 0.2
+        }
+      },
+      {
+        "type": "short_answer",
+        "label": "解答题",
+        "count": 3,
+        "score_per_question": null,
+        "total_score": 55,
+        "difficulty_ratio": {
+          "easy": 0.0,
+          "medium": 0.5,
+          "hard": 0.5
+        },
+        "_score_note": "解答题每题分值不均等，具体分值由难度权重和知识点覆盖需求决定",
+        "score_breakdown": [
+          { "question_index": 1, "score": 15, "difficulty": "medium" },
+          { "question_index": 2, "score": 18, "difficulty": "medium" },
+          { "question_index": 3, "score": 22, "difficulty": "hard" }
+        ]
+      }
+    ]
+  },
+
+  "global_difficulty_ratio": {
+    "_description": "整卷难度比例汇总",
+    "easy": 0.30,
+    "medium": 0.50,
+    "hard": 0.20
+  },
+
+  "knowledge_coverage": {
+    "_description": "试卷需要覆盖的知识模块及其权重",
+    "modules": [
+      { "knowledge_id": "K001-01-01", "name": "一元一次方程", "weight": 0.35, "min_score": 30 },
+      { "knowledge_id": "K001-02-01", "name": "一次函数",       "weight": 0.25, "min_score": 20 },
+      { "knowledge_id": "K002-01-01", "name": "全等三角形",     "weight": 0.30, "min_score": 25 },
+      { "knowledge_id": "K003",        "name": "统计与概率",     "weight": 0.10, "min_score": 10 }
+    ],
+    "_hint": "weight 总和应为 1.0。min_score 确保核心知识点在试卷中有最低分值覆盖"
+  },
+
+  "rag_config": {
+    "_description": "生成此试卷时使用的 RAG 检索参数",
+    "top_k": 5,
+    "similarity_threshold": 0.70,
+    "deduplicate_strategy": "by_knowledge_point_id",
+    "rerank_enabled": true
+  },
+
+  "generation_prompt_template": {
+    "_description": "传给 LLM 的 prompt 结构示意（实际使用时变量会被替换）",
+    "system": "你是一位经验丰富的{{subject}}教师，请根据以下要求为{{grade}}学生生成一份期中考试试卷。你所在的地域是{{region}}，教材版本为{{syllabus}}。",
+    "constraints": [
+      "试卷总分 {{total_score}} 分，考试时间 {{duration}} 分钟",
+      "试题难度比例 容易:中等:困难 = {{easy_ratio}}:{{medium_ratio}}:{{hard_ratio}}",
+      "必须覆盖以下知识点：{{knowledge_list}}",
+      "每个知识点至少出 {{min_questions_per_kp}} 道相关题目",
+      "试题语言准确、严谨，不能出现科学性错误",
+      "解答题需给出详细的参考答案和评分标准"
+    ],
+    "output_format": {
+      "type": "json",
+      "schema_ref": "见 paper_output_schema.json（待定义）"
+    }
+  }
+}

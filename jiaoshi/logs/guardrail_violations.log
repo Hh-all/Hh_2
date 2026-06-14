@@ -1,0 +1,6 @@
+{"timestamp": "2026-06-14T03:20:08.331112+00:00", "rule_id": "RULE-006", "severity": "BLOCKER", "message": "检索 top_k=100 超过上限 50", "action": "retrieve", "phase": "before", "context": {"top_k": 100, "max": 50}}
+{"timestamp": "2026-06-14T03:20:08.332114+00:00", "rule_id": "RULE-004", "severity": "BLOCKER", "message": "题目 #1 缺少必填字段: answer, analysis", "action": "generate", "phase": "after", "context": {"index": 1, "missing": ["answer", "analysis"]}}
+{"timestamp": "2026-06-14T03:20:08.332114+00:00", "rule_id": "RULE-009", "severity": "BLOCKER", "message": "题目 #1 难度 0 不在 1-5 范围", "action": "generate", "phase": "after", "context": {"index": 1, "difficulty": 0}}
+{"timestamp": "2026-06-14T03:20:08.333113+00:00", "rule_id": "RULE-003", "severity": "BLOCKER", "message": "检测到敏感词 '六四' (位置: question_text)", "action": "", "phase": "after", "context": {"location": "question_text", "matched": "六四"}}
+{"timestamp": "2026-06-14T03:33:49.246706+00:00", "rule_id": "RULE-006", "severity": "BLOCKER", "message": "检索 top_k=100 超过上限 50", "action": "retrieve", "phase": "before", "context": {"top_k": 100, "max": 50}}
+{"timestamp": "2026-06-14T05:16:18.381140+00:00", "rule_id": "RULE-006", "severity": "BLOCKER", "message": "检索 top_k=100 超过上限 50", "action": "retrieve", "phase": "before", "context": {"top_k": 100, "max": 50}}

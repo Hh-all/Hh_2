@@ -1,0 +1,41 @@
+# Git
+.git/
+.gitignore
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+env/
+venv/
+
+# IDE
+.vscode/
+.idea/
+
+# 测试 & 缓存
+.pytest_cache/
+tests/__pycache__/
+
+# 环境变量（不要打包进镜像）
+backend/.env
+.env
+
+# 输出目录（运行时挂载 volume）
+output/
+
+# 文档
+docs/
+README.md
+
+# 临时文件
+*.tmp
+*.log
+.DS_Store
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+nginx.conf

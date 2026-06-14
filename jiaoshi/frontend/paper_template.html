@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ metadata.title or '试卷' }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm 2.2cm 2cm 2.2cm;
+            @top-center {
+                content: element(header);
+                font-size: 10px;
+                color: #666;
+            }
+            @bottom-center {
+                content: "第 " counter(page) " 页 / 共 " counter(pages) " 页";
+                font-size: 9px;
+                color: #999;
+            }
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: "SimSun", "Songti SC", "Noto Serif CJK SC", "Times New Roman", serif;
+            font-size: 14px;
+            line-height: 2;
+            color: #000;
+            background: #fff;
+            max-width: 210mm;
+            margin: 0 auto;
+            padding: 20px 30px;
+        }
+
+        /* ====== 卷头 ====== */
+        .paper-header {
+            text-align: center;
+            border-bottom: 2px solid #000;
+            padding-bottom: 16px;
+            margin-bottom: 20px;
+        }
+        .paper-header h1 {
+            font-size: 22px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+        .paper-header .subtitle {
+            font-size: 13px;
+            color: #333;
+        }
+        .paper-header .meta {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 10px;
+            font-size: 13px;
+        }
+        .paper-header .meta span {
+            display: inline-block;
+        }
+
+        /* ====== 注意事项 ====== */
+        .notice-box {
+            border: 1px solid #000;
+            padding: 10px 16px;
+            margin-bottom: 24px;
+            font-size: 12px;
+            line-height: 1.8;
+        }
+        .notice-box h3 {
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+        .notice-box ol {
+            padding-left: 22px;
+        }
+
+        /* ====== 分数表格 ====== */
+        .score-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 24px;
+            font-size: 13px;
+        }
+        .score-table th, .score-table td {
+            border: 1px solid #000;
+            padding: 4px 8px;
+            text-align: center;
+        }
+        .score-table th {
+            background: #f5f5f5;
+        }
+
+        /* ====== 题型区 ====== */
+        .section {
+            margin-bottom: 28px;
+        }
+        .section-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            border-bottom: 1px dashed #999;
+            padding-bottom: 4px;
+        }
+        .section-title .score-hint {
+            font-size: 12px;
+            font-weight: normal;
+            color: #555;
+            margin-left: 8px;
+        }
+
+        /* ====== 题目 ====== */
+        .question {
+            margin-bottom: 18px;
+            page-break-inside: avoid;
+        }
+        .question .q-num {
+            font-weight: bold;
+            margin-right: 6px;
+        }
+        .question .q-text {
+            display: inline;
+        }
+
+        /* 选择题选项 */
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2px 20px;
+            margin-top: 4px;
+            padding-left: 22px;
+        }
+        .options .opt {
+            font-size: 13px;
+        }
+
+        /* 填空题空行 */
+        .blank-line {
+            display: inline-block;
+            min-width: 80px;
+            border-bottom: 1px solid #000;
+            margin: 0 4px;
+            text-indent: 0;
+        }
+
+        /* 解答题作答区 */
+        .answer-area {
+            border: 1px dashed #ccc;
+            min-height: 120px;
+            margin-top: 8px;
+            margin-left: 22px;
+            border-radius: 2px;
+        }
+
+        /* ====== 装订线 ====== */
+        .seal-line {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 30px;
+            border-right: 1px dashed #999;
+            font-size: 10px;
+            color: #999;
+            text-align: center;
+            padding-top: 200px;
+            writing-mode: vertical-lr;
+            letter-spacing: 4px;
+        }
+
+        /* 打印时隐藏按钮 */
+        .no-print { display: inline-block; }
+        @media print {
+            .no-print { display: none !important; }
+            body { padding: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- 装订线 -->
+<div class="seal-line no-print" style="display:none;">
+    学校__________  班级__________  姓名__________  学号__________
+</div>
+
+<!-- ====== 卷头 ====== -->
+<div class="paper-header">
+    <h1>{{ metadata.title }}</h1>
+    <div class="subtitle">
+        {{ metadata.subject }}试卷
+        {% if metadata.region %}（{{ metadata.region }}专用）{% endif %}
+    </div>
+    <div class="meta">
+        <span>满分：{{ metadata.total_score }} 分</span>
+        <span>考试时间：{{ metadata.duration_minutes }} 分钟</span>
+        <span>适用年级：{{ metadata.grade }}</span>
+    </div>
+</div>
+
+<!-- 注意事项 -->
+<div class="notice-box">
+    <h3>注意事项：</h3>
+    <ol>
+        <li>本试卷共 {{ sections|length }} 大题，{{ total_questions }} 小题，满分 {{ metadata.total_score }} 分，考试时间 {{ metadata.duration_minutes }} 分钟。</li>
+        <li>答题前，考生务必将自己的姓名、准考证号填写在答题卡规定的位置上。</li>
+        <li>所有答案必须写在答题卡上，写在试卷上无效。考试结束后，将试卷和答题卡一并交回。</li>
+    </ol>
+</div>
+
+<!-- 分数表 -->
+<table class="score-table">
+    <tr>
+        <th>题型</th>
+        {% for sec in sections %}
+        <th>{{ sec.label }}</th>
+        {% endfor %}
+        <th>总分</th>
+    </tr>
+    <tr>
+        <td>得分</td>
+        {% for sec in sections %}
+        <td></td>
+        {% endfor %}
+        <td></td>
+    </tr>
+</table>
+
+<!-- ====== 题目区 ====== -->
+{% for sec in sections %}
+<div class="section">
+    <div class="section-title">
+        {{ loop.index }}、{{ sec.label }}
+        <span class="score-hint">（共 {{ sec.questions|length }} 题，{{ sec.total_score }} 分）</span>
+    </div>
+
+    {% for q in sec.questions %}
+    <div class="question">
+        <span class="q-num">{{ loop.index }}．</span>
+        <span class="q-text">{{ q.text }}</span>
+
+        {% if q.type == 'choice' and q.options %}
+        <div class="options">
+            {% for opt in q.options %}
+            <span class="opt">{{ opt }}</span>
+            {% endfor %}
+        </div>
+        {% elif q.type == 'fill_blank' %}
+        <!-- 填空处已嵌入题干，用 ______ 表示 -->
+        {% elif q.type == 'short_answer' %}
+        <div class="answer-area"></div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endfor %}
+
+<!-- ====== 底部操作栏（屏幕显示） ====== -->
+<div class="no-print" style="text-align:center; margin-top:40px; padding-top:20px; border-top:1px solid #ddd;">
+    <button onclick="window.print()" style="padding:10px 30px; font-size:15px; cursor:pointer; background:#4f46e5; color:#fff; border:none; border-radius:4px;">
+        打印 / 导出 PDF
+    </button>
+    <p style="margin-top:8px; font-size:12px; color:#999;">
+        点击按钮后，在打印对话框中选择"另存为 PDF"即可下载
+    </p>
+</div>
+
+</body>
+</html>

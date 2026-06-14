@@ -1,0 +1,43 @@
+# ============================================================
+# Prometheus 配置 — 智能试卷生成系统
+# ============================================================
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    app: exam-paper-generator
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+rule_files: []
+
+scrape_configs:
+  # Flask API 指标（需在 Flask 中启用 prometheus_flask_exporter）
+  - job_name: "exam-api"
+    static_configs:
+      - targets: ["api:5000"]
+    metrics_path: "/metrics"
+    scrape_interval: 10s
+
+  # Celery Worker 指标（需 celery[prometheus]）
+  - job_name: "celery-worker"
+    static_configs:
+      - targets: ["celery_worker:5555"]
+    metrics_path: "/metrics"
+    scrape_interval: 15s
+
+  # Redis 指标
+  - job_name: "redis"
+    static_configs:
+      - targets: ["redis:6379"]
+    metrics_path: "/metrics"
+    scrape_interval: 30s
+
+  # Prometheus 自身
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]

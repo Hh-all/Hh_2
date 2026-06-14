@@ -1,0 +1,70 @@
+# 智能试卷生成系统 - 配置文件
+# 复制此文件为 config.local.yaml 并填入实际值
+
+# 服务配置
+server:
+  host: "127.0.0.1"
+  port: 5000
+  debug: true
+
+# 地域配置（可根据需要扩展）
+regions:
+  - id: "cn_beijing"
+    name: "北京"
+    syllabus: "人教版"
+  - id: "cn_shanghai"
+    name: "上海"
+    syllabus: "沪教版"
+  - id: "cn_guangdong"
+    name: "广东"
+    syllabus: "粤教版"
+
+# 学科配置
+subjects:
+  - id: "math"
+    name: "数学"
+    grades: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+  - id: "chinese"
+    name: "语文"
+    grades: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+  - id: "english"
+    name: "英语"
+    grades: [3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+
+# 试卷难度级别
+difficulty_levels:
+  - easy
+  - medium
+  - hard
+
+# LLM 配置
+llm:
+  provider: "openai"           # openai / azure / local
+  api_key: ""                   # 在此填入 API Key
+  api_base: "https://api.openai.com/v1"
+  model: "gpt-4o"
+  temperature: 0.7
+  max_tokens: 4096
+
+# 向量数据库配置
+vectordb:
+  engine: "chromadb"
+  persist_directory: "./data/chroma_db"
+  embedding_model: "text-embedding-3-small"
+
+# RAG 检索配置
+rag:
+  top_k: 5
+  similarity_threshold: 0.7
+  chunk_size: 512
+  chunk_overlap: 64
+
+# 试卷生成参数
+exam:
+  default_total_score: 100
+  default_duration_minutes: 90
+  question_types:
+    - choice        # 选择题
+    - fill_blank    # 填空题
+    - short_answer  # 简答题
+    - essay         # 论述题

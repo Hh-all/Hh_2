@@ -1,0 +1,78 @@
+{
+  "_comment": "智能试卷生成系统 - 核心数据模型定义",
+
+  "subjects": {
+    "_description": "学科列表，每个学科包含唯一标识符和显示名称",
+    "items": [
+      { "id": "math", "name": "数学" },
+      { "id": "chinese", "name": "语文" },
+      { "id": "english", "name": "英语" }
+    ]
+  },
+
+  "grades": {
+    "_description": "年级定义，按学段分组。id 为全局唯一，stage 标识学段",
+    "stages": {
+      "primary": {
+        "name": "小学",
+        "grade_range": [1, 6],
+        "entries": [
+          { "id": 1,  "label": "一年级" },
+          { "id": 2,  "label": "二年级" },
+          { "id": 3,  "label": "三年级" },
+          { "id": 4,  "label": "四年级" },
+          { "id": 5,  "label": "五年级" },
+          { "id": 6,  "label": "六年级" }
+        ]
+      },
+      "junior": {
+        "name": "初中",
+        "grade_range": [7, 9],
+        "entries": [
+          { "id": 7,  "label": "七年级" },
+          { "id": 8,  "label": "八年级" },
+          { "id": 9,  "label": "九年级" }
+        ]
+      },
+      "senior": {
+        "name": "高中",
+        "grade_range": [10, 12],
+        "entries": [
+          { "id": 10, "label": "高一" },
+          { "id": 11, "label": "高二" },
+          { "id": 12, "label": "高三" }
+        ]
+      }
+    }
+  },
+
+  "regions": {
+    "_description": "地域列表，code 为拼音标识用于程序引用，name 为中文显示名，syllabus 为对应教材版本",
+    "items": [
+      { "code": "beijing",    "name": "北京", "syllabus": "人教版" },
+      { "code": "shanghai",   "name": "上海", "syllabus": "沪教版" },
+      { "code": "guangdong",  "name": "广东", "syllabus": "粤教版" }
+    ]
+  },
+
+  "question_types": {
+    "_description": "题型定义。code 用于程序引用，label 为显示名，scored 表示是否需要人工评分",
+    "items": [
+      { "code": "choice",       "label": "选择题",   "scored": false },
+      { "code": "fill_blank",   "label": "填空题",   "scored": false },
+      { "code": "true_false",   "label": "判断题",   "scored": false },
+      { "code": "short_answer", "label": "简答题",   "scored": true  },
+      { "code": "essay",        "label": "论述题",   "scored": true  },
+      { "code": "calculation",  "label": "计算题",   "scored": true  }
+    ]
+  },
+
+  "difficulty_levels": {
+    "_description": "难度级别定义，ratio 为建议比例",
+    "levels": [
+      { "code": "easy",   "label": "容易", "ratio": 0.3 },
+      { "code": "medium", "label": "中等", "ratio": 0.5 },
+      { "code": "hard",   "label": "困难", "ratio": 0.2 }
+    ]
+  }
+}

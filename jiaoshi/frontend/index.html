@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能试卷生成系统</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #eef2ff;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-700: #374151;
+            --gray-900: #111827;
+            --radius-sm: 8px;
+            --radius: 12px;
+            --radius-lg: 16px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,.05);
+            --shadow: 0 1px 3px rgba(0,0,0,.1), 0 1px 2px rgba(0,0,0,.06);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,.08), 0 4px 10px rgba(0,0,0,.05);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;
+            background: linear-gradient(135deg, #f0f4ff 0%, #f5f0ff 30%, #f0faf5 60%, #fef9f0 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: var(--gray-900);
+            line-height: 1.6;
+        }
+
+        /* ---- 顶部导航 ---- */
+        .topbar {
+            background: rgba(255,255,255,.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--gray-200);
+            padding: 0 32px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .topbar .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+        .topbar .logo .icon {
+            width: 34px;
+            height: 34px;
+            background: linear-gradient(135deg, var(--primary), #8b5cf6);
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 18px;
+        }
+        .topbar .status {
+            font-size: 12px;
+            color: var(--gray-500);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .topbar .status .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .4; }
+        }
+
+        /* ---- 主容器 ---- */
+        .main-wrap {
+            max-width: 820px;
+            margin: 28px auto 48px;
+            padding: 0 16px;
+        }
+
+        /* ---- 步骤指示器 ---- */
+        .steps {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 24px;
+        }
+        .step {
+            flex: 1;
+            text-align: center;
+            padding: 8px 4px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--gray-400);
+            background: #fff;
+            transition: all .3s;
+        }
+        .step.active {
+            background: var(--primary-light);
+            color: var(--primary);
+            font-weight: 600;
+        }
+        .step .num {
+            display: inline-block;
+            width: 22px;
+            height: 22px;
+            line-height: 22px;
+            border-radius: 50%;
+            background: var(--gray-200);
+            color: var(--gray-500);
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .step.active .num {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        /* ---- 卡片 ---- */
+        .card {
+            background: #fff;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            padding: 28px 32px;
+            margin-bottom: 16px;
+            border: 1px solid var(--gray-100);
+            transition: box-shadow .25s;
+        }
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+        .card-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-title .badge {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            background: var(--primary-light);
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        /* ---- 表单控件 ---- */
+        .field-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+        .field-row.col3 { grid-template-columns: 1fr 1fr 1fr; }
+        .field-row.col1 { grid-template-columns: 1fr; }
+
+        .field label, .field .label-text {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--gray-700);
+            margin-bottom: 5px;
+        }
+        .field select {
+            width: 100%;
+            padding: 9px 12px;
+            font-size: 14px;
+            border: 1.5px solid var(--gray-200);
+            border-radius: var(--radius-sm);
+            background: #fff;
+            color: var(--gray-900);
+            cursor: pointer;
+            transition: all .2s;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 8L1 3h10z' fill='%239ca3af'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 30px;
+        }
+        .field select:hover { border-color: var(--gray-300); }
+        .field select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99,102,241,.1);
+        }
+
+        /* ---- 知识点网格 ---- */
+        .kp-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
+            gap: 8px;
+            padding: 14px;
+            border: 1.5px solid var(--gray-200);
+            border-radius: var(--radius-sm);
+            background: var(--gray-50);
+            max-height: 280px;
+            overflow-y: auto;
+        }
+        .kp-grid label {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 6px 10px;
+            background: #fff;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all .15s;
+            border: 1px solid transparent;
+            font-weight: 400;
+            color: var(--gray-700);
+            user-select: none;
+        }
+        .kp-grid label:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+        .kp-grid label:has(input:checked) {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            font-weight: 500;
+        }
+        .kp-grid input[type="checkbox"] {
+            width: 15px;
+            height: 15px;
+            accent-color: var(--primary);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .kp-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+        .kp-actions a {
+            font-size: 12px;
+            color: var(--primary);
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .kp-actions a:hover { text-decoration: underline; }
+
+        /* ---- 难度选择 ---- */
+        .diff-group {
+            display: flex;
+            gap: 8px;
+        }
+        .diff-option {
+            flex: 1;
+            text-align: center;
+            padding: 10px 6px;
+            border-radius: var(--radius-sm);
+            border: 1.5px solid var(--gray-200);
+            cursor: pointer;
+            transition: all .2s;
+            font-size: 13px;
+            font-weight: 500;
+            background: #fff;
+            user-select: none;
+        }
+        .diff-option:hover { border-color: var(--gray-300); }
+        .diff-option input { display: none; }
+        .diff-option:has(input:checked) {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            font-weight: 600;
+            box-shadow: 0 0 0 2px rgba(99,102,241,.1);
+        }
+        .diff-option .icon {
+            font-size: 20px;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        /* ---- 按钮 ---- */
+        .btn-primary {
+            width: 100%;
+            padding: 13px 0;
+            font-size: 15px;
+            font-weight: 600;
+            color: #fff;
+            background: linear-gradient(135deg, var(--primary), #8b5cf6);
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all .2s;
+            letter-spacing: .5px;
+            box-shadow: 0 4px 12px rgba(99,102,241,.3);
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(99,102,241,.4);
+        }
+        .btn-primary:active { transform: translateY(0); }
+        .btn-primary:disabled {
+            opacity: .6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* ---- 输出区域 ---- */
+        .output-card {
+            background: #1e293b;
+            color: #e2e8f0;
+            border-radius: var(--radius-lg);
+            padding: 18px 22px;
+            font-family: "Cascadia Code", "Fira Code", "Consolas", monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            min-height: 48px;
+            position: relative;
+            overflow: hidden;
+        }
+        .output-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), #8b5cf6, var(--success));
+        }
+        .output-card:empty { display: none; }
+        .output-card .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255,255,255,.2);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ---- 响应式 ---- */
+        @media (max-width: 600px) {
+            .field-row { grid-template-columns: 1fr; }
+            .kp-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+            .card { padding: 20px 16px; }
+            .topbar { padding: 0 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- 顶部导航 -->
+<div class="topbar">
+    <div class="logo">
+        <div class="icon">&#9997;</div>
+        <span>智能试卷生成系统</span>
+    </div>
+    <div class="status">
+        <span class="dot"></span>
+        <span id="statusText">服务就绪</span>
+    </div>
+</div>
+
+<div class="main-wrap">
+
+    <!-- 步骤指示器 -->
+    <div class="steps">
+        <div class="step active"><span class="num">1</span><br>选择参数</div>
+        <div class="step"><span class="num">2</span><br>生成试卷</div>
+        <div class="step"><span class="num">3</span><br>预览导出</div>
+    </div>
+
+    <form id="paperForm">
+        <!-- 卡片1：年级 + 学科 + 地域 -->
+        <div class="card">
+            <div class="card-title">&#128218; 基本设置 <span class="badge">必选</span></div>
+            <div class="field-row col3">
+                <div class="field">
+                    <label for="grade">&#127891; 年级</label>
+                    <select id="grade" name="grade">
+                        <optgroup label="小学"><option value="1">一年级</option><option value="2">二年级</option><option value="3">三年级</option><option value="4">四年级</option><option value="5">五年级</option><option value="6">六年级</option></optgroup>
+                        <optgroup label="初中"><option value="7">七年级</option><option value="8" selected>八年级</option><option value="9">九年级</option></optgroup>
+                        <optgroup label="高中"><option value="10">高一</option><option value="11">高二</option><option value="12">高三</option></optgroup>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="subject">&#128213; 学科</label>
+                    <select id="subject" name="subject"></select>
+                </div>
+                <div class="field">
+                    <label for="region">&#127759; 地域</label>
+                    <select id="region" name="region">
+                        <option value="beijing">北京</option>
+                        <option value="shanghai">上海</option>
+                        <option value="guangdong">广东</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- 卡片2：知识点 -->
+        <div class="card">
+            <div class="card-title">&#128269; 知识点选择 <span class="badge">可多选</span></div>
+            <div class="kp-grid" id="knowledgeCheckboxes"></div>
+            <div class="kp-actions">
+                <a href="#" id="selectAll">&#9745; 全选</a>
+                <a href="#" id="deselectAll">&#9744; 取消全选</a>
+            </div>
+        </div>
+
+        <!-- 卡片3：难度 -->
+        <div class="card">
+            <div class="card-title">&#127919; 难度等级</div>
+            <div class="diff-group">
+                <label class="diff-option">
+                    <input type="radio" name="difficulty" value="easy">
+                    <span class="icon">&#128522;</span> 基础
+                </label>
+                <label class="diff-option">
+                    <input type="radio" name="difficulty" value="medium" checked>
+                    <span class="icon">&#128526;</span> 中等
+                </label>
+                <label class="diff-option">
+                    <input type="radio" name="difficulty" value="hard">
+                    <span class="icon">&#129327;</span> 困难
+                </label>
+            </div>
+        </div>
+
+        <!-- 生成按钮 -->
+        <button type="submit" class="btn-primary">&#9889; 生成试卷</button>
+    </form>
+
+    <!-- 输出区域 -->
+    <div class="output-card" id="output" style="margin-top:16px;"></div>
+
+</div>
+
+<script>
+(function () {
+    var form = document.getElementById('paperForm');
+    var output = document.getElementById('output');
+    var subjectSelect = document.getElementById('subject');
+    var gradeSelect = document.getElementById('grade');
+    var knowledgeGrid = document.getElementById('knowledgeCheckboxes');
+    var statusText = document.getElementById('statusText');
+
+    var gradeLabels = {
+        '1':'一年级','2':'二年级','3':'三年级','4':'四年级','5':'五年级','6':'六年级',
+        '7':'七年级','8':'八年级','9':'九年级','10':'高一','11':'高二','12':'高三'
+    };
+
+    var ALL_SUBJECTS = [
+        { code:'math',     name:'数学',     minGrade:1,  maxGrade:12 },
+        { code:'chinese',  name:'语文',     minGrade:1,  maxGrade:12 },
+        { code:'english',  name:'英语',     minGrade:1,  maxGrade:12 },
+        { code:'physics',  name:'物理',     minGrade:8,  maxGrade:12 },
+        { code:'chemistry',name:'化学',     minGrade:9,  maxGrade:12 },
+        { code:'biology',  name:'生物',     minGrade:7,  maxGrade:12 },
+        { code:'history',  name:'历史',     minGrade:7,  maxGrade:12 },
+        { code:'geography',name:'地理',     minGrade:7,  maxGrade:12 },
+        { code:'politics', name:'政治',     minGrade:7,  maxGrade:12 },
+    ];
+
+    // ==================== 知识点库（按年级精确到每个年级） ====================
+    var KNOWLEDGE_MAP = {
+        math: {
+            '1':[{id:'num1_10',label:'1-10的认识和书写'},{id:'add_sub_10',label:'10以内加减法'},{id:'obj_classify',label:'物体的分类与比较'},{id:'shape_recog',label:'认识图形'},{id:'position',label:'上下左右前后位置'}],
+            '2':[{id:'num_100',label:'100以内数的认识'},{id:'add_sub_100',label:'100以内加减法(竖式)'},{id:'multi_table',label:'表内乘法(九九乘法表)'},{id:'length_unit',label:'长度单位(厘米/米)'},{id:'clock',label:'认识钟表'},{id:'angle_recog',label:'角的初步认识'}],
+            '3':[{id:'multi_div',label:'多位数乘除法'},{id:'fraction_intro',label:'分数的初步认识'},{id:'area_perimeter',label:'长方形和正方形的周长面积'},{id:'time_unit',label:'时间单位(秒/分/时)'},{id:'weight_unit',label:'重量单位(克/千克/吨)'},{id:'bar_chart',label:'条形统计图'}],
+            '4':[{id:'large_num',label:'大数的认识(亿以内)'},{id:'angle_measure',label:'角的度量'},{id:'parallel_perp',label:'平行与垂直'},{id:'decimal_intro',label:'小数的意义和加减法'},{id:'area_trap',label:'平行四边形和梯形的面积'},{id:'line_chart',label:'折线统计图'}],
+            '5':[{id:'decimal_multi',label:'小数乘除法'},{id:'fraction_ops',label:'分数的加减法'},{id:'equation_intro',label:'用字母表示数和简易方程'},{id:'tri_area',label:'三角形的面积'},{id:'volume_cube',label:'长方体和正方体的体积'},{id:'probability',label:'可能性(随机事件)'}],
+            '6':[{id:'fraction_multi',label:'分数乘除法'},{id:'percent',label:'百分数'},{id:'ratio',label:'比和比例'},{id:'circle',label:'圆的认识和周长面积'},{id:'cylinder',label:'圆柱和圆锥'},{id:'negative_num',label:'负数的初步认识'}],
+            '7':[{id:'integer_ops',label:'有理数运算'},{id:'linear_eq_1',label:'一元一次方程'},{id:'plane_geo_1',label:'平面图形初步(线与角)'},{id:'data_collect',label:'数据的收集与整理'}],
+            '8':[{id:'triangle',label:'三角形与全等'},{id:'linear_eq_sys',label:'二元一次方程组'},{id:'factoring',label:'整式乘除与因式分解'},{id:'inequality',label:'一元一次不等式'},{id:'pythagorean',label:'勾股定理'}],
+            '9':[{id:'quadratic_eq',label:'一元二次方程'},{id:'quadratic_func',label:'二次函数'},{id:'similar_tri',label:'相似三角形'},{id:'circle_geo',label:'圆'},{id:'trig_intro',label:'锐角三角函数'},{id:'probability_stats',label:'概率初步'}],
+            '10':[{id:'set',label:'集合与逻辑用语'},{id:'function_concept',label:'函数的概念与性质'},{id:'power_func',label:'幂/指数/对数函数'},{id:'trig_func',label:'三角函数'},{id:'plane_vector',label:'平面向量'}],
+            '11':[{id:'sequence',label:'数列'},{id:'inequality_senior',label:'不等式'},{id:'solid_geo',label:'立体几何'},{id:'line_circle',label:'直线与圆的方程'},{id:'probability_senior',label:'概率与统计'},{id:'derivative',label:'导数及其应用'}],
+            '12':[{id:'counting',label:'计数原理(排列组合)'},{id:'conic',label:'圆锥曲线'},{id:'spatial_vector',label:'空间向量'},{id:'complex_num',label:'复数'},{id:'review',label:'综合复习与压轴训练'}]
+        },
+        chinese: {
+            '1':[{id:'pinyin',label:'汉语拼音(声母韵母)'},{id:'stroke',label:'基本笔画和笔顺'},{id:'char_200',label:'认识常用汉字200个'},{id:'simple_read',label:'简单儿歌/短文阅读'},{id:'sentence',label:'写一句完整的话'}],
+            '2':[{id:'char_400',label:'识字量400字'},{id:'dict_lookup',label:'音序查字法'},{id:'idiom_simple',label:'简单成语积累'},{id:'read_aloud',label:'有感情朗读课文'},{id:'diary',label:'学写日记'}],
+            '3':[{id:'char_600',label:'识字量600字'},{id:'radical',label:'部首查字法'},{id:'para_summary',label:'概括段落大意'},{id:'ancient_poem_3',label:'背诵古诗20首'},{id:'short_essay',label:'写200字短文'}],
+            '4':[{id:'char_800',label:'识字量800字'},{id:'rhetoric',label:'比喻/拟人/排比修辞'},{id:'reading_comp',label:'阅读理解(找中心句)'},{id:'letter_writing',label:'学写书信'},{id:'observation',label:'观察日记'}],
+            '5':[{id:'char_1000',label:'识字量1000字'},{id:'text_structure',label:'文章结构(总分/并列)'},{id:'classical_intro',label:'文言文启蒙(短小古文)'},{id:'narrative',label:'记叙文写作(400字)'},{id:'sick_sentence',label:'修改病句'}],
+            '6':[{id:'char_1200',label:'识字量1200字'},{id:'topic_sentence',label:'找中心句和关键词'},{id:'ancient_poem_6',label:'背诵古诗40首'},{id:'exposition',label:'说明文阅读'},{id:'argument_intro',label:'议论文入门'}],
+            '7':[{id:'classical_7',label:'课内文言文(论语/世说)'},{id:'modern_reading_7',label:'现代文阅读(记叙/说明)'},{id:'poetry_appr',label:'古诗词鉴赏(意象/情感)'},{id:'writing_7',label:'记叙文写作(500字)'},{id:'grammar_7',label:'词性和短语结构'}],
+            '8':[{id:'classical_8',label:'课内文言文(孟子/史记)'},{id:'argument_read',label:'议论文阅读(论点/论据)'},{id:'literary_genre',label:'文学体裁(小说/散文/戏剧)'},{id:'writing_8',label:'说明文/议论文写作'},{id:'syntax_8',label:'单句成分和复句类型'}],
+            '9':[{id:'classical_9',label:'课内文言文(出师表等)'},{id:'poetry_compare',label:'古诗词比较阅读'},{id:'modern_synthesis',label:'现代文综合阅读'},{id:'writing_9',label:'中考作文训练(600字)'},{id:'classic_novel',label:'名著阅读(水浒/西游)'}],
+            '10':[{id:'classical_10',label:'文言文(必修上下)'},{id:'poetry_senior_1',label:'古诗词(必修篇目)'},{id:'essay_10',label:'议论文写作(800字)'},{id:'literary_theory',label:'文学理论与鉴赏'},{id:'language_use',label:'语言文字运用'}],
+            '11':[{id:'classical_11',label:'文言文(选择性必修)'},{id:'poetry_senior_2',label:'古诗词(选择性必修)'},{id:'essay_11',label:'议论文写作(素材论证)'},{id:'practical_write',label:'实用类文本写作'},{id:'classic_full',label:'整本书阅读(红楼梦)'}],
+            '12':[{id:'gaokao_review',label:'高考总复习'},{id:'compo_synthesis',label:'作文综合训练'},{id:'ancient_full',label:'古诗文综合训练'},{id:'modern_full',label:'现代文综合训练'},{id:'lang_full',label:'语用综合训练'}]
+        },
+        english: {
+            '1':[{id:'abc',label:'26个字母认读书写'},{id:'color_animal',label:'颜色/动物/水果词汇'},{id:'greeting',label:'简单问候(Hello!)'},{id:'num_en_1',label:'英文数字1-10'}],
+            '2':[{id:'family_school',label:'家庭/学校用品词汇'},{id:'adj_simple',label:'简单形容词(big/small)'},{id:'verb_simple',label:'简单动词(run/eat)'},{id:'sentence_en_2',label:'简单陈述句(I like...)'}],
+            '3':[{id:'food_body',label:'食物/身体部位词汇'},{id:'pronoun',label:'人称代词(I/you/he/she)'},{id:'be_verb',label:'be动词(am/is/are)'},{id:'question_en_3',label:'简单疑问句(What...?)'}],
+            '4':[{id:'time_weather',label:'时间/天气/季节词汇'},{id:'present_cont',label:'现在进行时(be doing)'},{id:'plural',label:'名词单复数'},{id:'preposition',label:'方位介词(in/on/under)'}],
+            '5':[{id:'hobby_job',label:'爱好/职业词汇'},{id:'simple_past',label:'一般过去时'},{id:'simple_future',label:'一般将来时(be going to)'},{id:'reading_en_5',label:'50词短文阅读理解'}],
+            '6':[{id:'travel_shop',label:'旅行/购物词汇'},{id:'comparative',label:'形容词比较级和最高级'},{id:'present_perfect',label:'现在完成时入门'},{id:'writing_en_6',label:'简单书面表达(50词)'}],
+            '7':[{id:'daily_topics',label:'日常话题词汇(健康/交通)'},{id:'tenses_7',label:'一般现在/过去/将来时'},{id:'modal_verb',label:'情态动词(can/must/should)'},{id:'reading_en_7',label:'100词短文阅读'},{id:'writing_en_7',label:'书面表达(80词)'}],
+            '8':[{id:'culture',label:'文化话题词汇'},{id:'past_cont',label:'过去进行时'},{id:'passive',label:'被动语态入门'},{id:'clause_8',label:'宾语从句/状语从句'},{id:'writing_en_8',label:'书面表达(100词)'}],
+            '9':[{id:'tech_env',label:'科技/环境话题词汇'},{id:'present_perf_9',label:'现在完成时'},{id:'attr_clause',label:'定语从句'},{id:'reading_en_9',label:'200词阅读(推断/主旨)'},{id:'writing_en_9',label:'中考书面表达(120词)'}],
+            '10':[{id:'senior_vocab_1',label:'必修词汇(人与自然)'},{id:'tense_review',label:'时态综合复习'},{id:'non_finite',label:'非谓语动词'},{id:'noun_clause',label:'名词性从句'},{id:'writing_en_10',label:'应用文写作(书信/通知)'}],
+            '11':[{id:'senior_vocab_2',label:'选修词汇(人与社会)'},{id:'subjunctive',label:'虚拟语气'},{id:'inversion',label:'倒装与强调'},{id:'discourse',label:'语篇填空/七选五'},{id:'writing_en_11',label:'读后续写/概要写作'}],
+            '12':[{id:'senior_vocab_3',label:'高考词汇总复习'},{id:'grammar_full',label:'语法综合训练'},{id:'reading_gaokao',label:'高考阅读理解(四篇)'},{id:'cloze_gaokao',label:'完形填空综合'},{id:'writing_gaokao',label:'高考书面表达综合'}]
+        },
+        physics: {
+            '8':[{id:'motion_sound',label:'机械运动与声现象'},{id:'light_reflect',label:'光的反射与平面镜成像'},{id:'lens',label:'透镜及其应用'},{id:'density',label:'质量与密度'}],
+            '9':[{id:'force_motion',label:'力与运动(牛顿第一定律)'},{id:'pressure',label:'压强与浮力'},{id:'simple_machine',label:'简单机械(杠杆/滑轮)'},{id:'work_energy',label:'功和机械能'},{id:'circuit',label:'电路基础(欧姆定律)'},{id:'electric_power',label:'电功率与焦耳定律'}],
+            '10':[{id:'kinematics',label:'匀变速直线运动'},{id:'newton_laws',label:'牛顿运动定律'},{id:'curve_motion',label:'曲线运动(平抛/圆周)'},{id:'gravity',label:'万有引力与航天'}],
+            '11':[{id:'energy_momentum',label:'动能定理与动量守恒'},{id:'electric_field',label:'静电场'},{id:'dc_circuit',label:'恒定电流'},{id:'magnetic_field',label:'磁场(安培力/洛伦兹力)'},{id:'electromagnetic',label:'电磁感应'}],
+            '12':[{id:'ac_current',label:'交变电流'},{id:'wave_optics',label:'机械振动与机械波'},{id:'light_wave',label:'光(干涉/衍射/偏振)'},{id:'modern_physics',label:'近代物理(量子/相对论)'},{id:'review_physics',label:'高考综合复习'}]
+        },
+        chemistry: {
+            '9':[{id:'air_oxygen',label:'空气和氧气'},{id:'water',label:'水和溶液'},{id:'carbon',label:'碳和碳的氧化物'},{id:'metal',label:'金属和金属材料'},{id:'acid_base',label:'酸和碱'},{id:'salt',label:'盐和化肥'}],
+            '10':[{id:'mol',label:'物质的量'},{id:'ion_reaction',label:'离子反应'},{id:'redox',label:'氧化还原反应'},{id:'metal_na_fe',label:'钠/铁及其化合物'},{id:'nonmetal_cl_s',label:'氯/硫及其化合物'},{id:'periodic_table',label:'元素周期律'}],
+            '11':[{id:'chemical_bond',label:'化学键与分子结构'},{id:'thermochemistry',label:'化学反应与热能'},{id:'rate_balance',label:'反应速率与化学平衡'},{id:'water_solution',label:'水溶液中的离子平衡'},{id:'electrochemistry',label:'电化学基础'}],
+            '12':[{id:'organic_intro',label:'有机化学基础(烃)'},{id:'organic_derivative',label:'烃的衍生物'},{id:'biomolecule',label:'生命中的有机物'},{id:'polymer',label:'合成高分子'},{id:'review_chem',label:'高考综合复习'}]
+        },
+        biology: {
+            '7':[{id:'bio_env',label:'生物与环境'},{id:'cell_basic',label:'细胞基本结构'},{id:'plant_animal',label:'植物与动物的主要类群'}],
+            '8':[{id:'human_body',label:'人体生理(消化/呼吸/循环)'},{id:'reproduction',label:'生物的生殖和发育'},{id:'genetics_intro',label:'遗传与变异入门'}],
+            '10':[{id:'cell_mol',label:'细胞的分子组成'},{id:'cell_structure',label:'细胞的结构与功能'},{id:'metabolism',label:'细胞的能量代谢'},{id:'cell_cycle',label:'细胞的生命历程'}],
+            '11':[{id:'genetics_law',label:'遗传的基本规律'},{id:'gene',label:'基因与染色体'},{id:'variation',label:'变异与育种'},{id:'evolution',label:'生物的进化'},{id:'homeostasis',label:'稳态与调节'}],
+            '12':[{id:'ecology',label:'种群/群落/生态系统'},{id:'biotech',label:'现代生物技术'},{id:'review_bio',label:'高考综合复习'}]
+        },
+        history: {
+            '7':[{id:'ancient_civil',label:'中国古代史(先秦至南北朝)'},{id:'sui_tang',label:'隋唐时期'},{id:'song_yuan',label:'宋元时期'}],
+            '8':[{id:'ming_qing',label:'明清时期'},{id:'modern_1',label:'中国近代史(鸦片战争)'},{id:'modern_2',label:'新民主主义革命'}],
+            '9':[{id:'prc_found',label:'新中国成立与巩固'},{id:'reform_open',label:'改革开放'},{id:'world_ancient',label:'世界古代史'},{id:'world_modern',label:'世界近现代史'}],
+            '10':[{id:'ancient_politics',label:'中国古代政治制度'},{id:'ancient_economy',label:'中国古代经济'},{id:'ancient_culture',label:'中国传统文化主流思想'}],
+            '11':[{id:'modern_china_1',label:'中国近代政治'},{id:'modern_china_2',label:'新民主主义革命与建国'},{id:'modern_china_3',label:'社会主义建设道路'},{id:'world_history_1',label:'世界史(古希腊至近代)'}],
+            '12':[{id:'world_history_2',label:'世界现代史(一战至今)'},{id:'historiography',label:'史学理论与方法'},{id:'review_history',label:'高考综合复习'}]
+        },
+        geography: {
+            '7':[{id:'earth_map',label:'地球和地图'},{id:'climate_weather',label:'天气与气候'},{id:'population_city',label:'人口与聚落'}],
+            '8':[{id:'china_geo',label:'中国地理概况'},{id:'china_region',label:'中国区域地理'},{id:'world_geo',label:'世界地理概况'}],
+            '10':[{id:'earth_cosmic',label:'宇宙中的地球'},{id:'atmosphere',label:'大气运动与气候'},{id:'hydrosphere',label:'水循环与洋流'},{id:'lithosphere',label:'地表形态的塑造'}],
+            '11':[{id:'population_geo',label:'人口与城市地理'},{id:'agriculture_industry',label:'农业与工业地域'},{id:'transport',label:'交通运输布局'},{id:'environment_issue',label:'环境问题与可持续发展'}],
+            '12':[{id:'region_dev',label:'区域发展与协调'},{id:'geo_tech',label:'地理信息技术(RS/GIS)'},{id:'china_world',label:'中国与世界地理综合'},{id:'review_geo',label:'高考综合复习'}]
+        },
+        politics: {
+            '7':[{id:'morality_self',label:'认识自我与自尊自强'},{id:'emotion',label:'情绪与情感管理'},{id:'family_school_pol',label:'家庭与学校生活中的道德'}],
+            '8':[{id:'social_life',label:'社会生活与公共秩序'},{id:'law_basic',label:'法律基础知识'},{id:'rights_duty',label:'公民权利与义务'},{id:'national_symbol',label:'国家象征与意识'}],
+            '9':[{id:'national_dev',label:'国家发展与社会进步'},{id:'global_view',label:'国际视野与人类命运'},{id:'law_life',label:'法律与生活'}],
+            '10':[{id:'socialism_cn',label:'中国特色社会主义'},{id:'econ_life',label:'经济与社会'},{id:'party_leadership',label:'中国共产党的领导'}],
+            '11':[{id:'philosophy',label:'哲学与文化(唯物论/辩证法)'},{id:'political_system',label:'政治与法治(国体/政体)'},{id:'intl_relations',label:'当代国际政治与经济'}],
+            '12':[{id:'logic_thinking',label:'逻辑与思维'},{id:'law_life_full',label:'法律与生活综合'},{id:'ethics',label:'职业道德与法治意识'},{id:'review_politics',label:'高考综合复习'}]
+        }
+    };
+
+    // ==================== 模拟题库 ====================
+    var MOCK_BANK = {
+        math:{easy:[{type:"choice",text:"方程 x + 5 = 12 的解是（　）",options:["A. x = 5","B. x = 6","C. x = 7","D. x = 8"],answer:"C",analysis:"移项：x = 12 - 5 = 7"},{type:"choice",text:"三角形三个内角的和是（　）",options:["A. 90°","B. 180°","C. 270°","D. 360°"],answer:"B",analysis:"三角形内角和定理：三个内角的和为180°"},{type:"fill_blank",text:"数据 2, 3, 5, 7, 8 的中位数是 ______。",answer:"5",analysis:"从小到大排列，中间位置的数是5"}],
+        medium:[{type:"choice",text:"解方程 3x - 7 = 2x + 5，x 的值为（　）",options:["A. x = 10","B. x = 12","C. x = 8","D. x = 6"],answer:"B",analysis:"移项得 x = 12"},{type:"choice",text:"在直角三角形中，两直角边分别为 3 和 4，斜边长为（　）",options:["A. 5","B. 6","C. 7","D. 8"],answer:"A",analysis:"勾股定理：c² = 3² + 4² = 25，c = 5"},{type:"short_answer",text:"小明买了若干笔记本，每本3元，共花21元。他买了多少本？",answer:"设买x本，3x=21，x=7。答：7本。",analysis:"列方程1分，解方程1分，答1分"}],
+        hard:[{type:"choice",text:"抛物线 y = x² - 4x + 3 的顶点坐标是（　）",options:["A. (2, -1)","B. (-2, -1)","C. (2, 1)","D. (-2, 1)"],answer:"A",analysis:"配方：y = (x-2)² - 1"},{type:"short_answer",text:"已知函数 f(x) = x² - 2x - 3，求其在区间 [0, 3] 上的最值。",answer:"f(1)= -4(最小), f(3)=0(最大)",analysis:"求导f'(x)=2x-2，驻点x=1; 比较端点得最小值-4，最大值0"}]},
+        chinese:{easy:[{type:"choice",text:"补全诗句：'床前明月光，______。'（　）",options:["A. 低头思故乡","B. 疑是地上霜","C. 举头望明月","D. 月是故乡明"],answer:"B",analysis:"出自李白《静夜思》"},{type:"fill_blank",text:"写出一个表示'做事有恒心'的成语：______。",answer:"持之以恒",analysis:"也可答锲而不舍、坚持不懈等"}],
+        medium:[{type:"choice",text:"'春蚕到死丝方尽'的下一句是（　）",options:["A. 蜡炬成灰泪始干","B. 春风吹又生","C. 化作春泥更护花","D. 润物细无声"],answer:"A",analysis:"李商隐《无题》"},{type:"short_answer",text:"阅读：'春天来了，小草从土里钻出来，嫩嫩的，绿绿的。' 用了什么修辞？",answer:"拟人（'钻'字赋予小草人的动作）",analysis:"拟人手法1分，分析1分"}],
+        hard:[{type:"short_answer",text:"翻译：'三人行，必有我师焉。择其善者而从之。'",answer:"几个人走路，其中必有可做我老师的人。选择优点学习。",analysis:"翻译准确2分，理解句意2分"}]},
+        english:{easy:[{type:"choice",text:"What is the past tense of 'go'? （　）",options:["A. goed","B. went","C. gone","D. going"],answer:"B",analysis:"go 是不规则动词，过去式为 went"},{type:"fill_blank",text:"There ______ (be) many students there.",answer:"are",analysis:"students 是复数，用 are"}],
+        medium:[{type:"choice",text:"She ______ TV when her mother came back. （　）",options:["A. watched","B. was watching","C. watches","D. is watching"],answer:"B",analysis:"过去进行时：was/were + doing"},{type:"short_answer",text:"Translate: 我已经做完作业了。",answer:"I have already finished my homework.",analysis:"现在完成时"}],
+        hard:[{type:"fill_blank",text:"By the time he arrives, we ______ (wait) for two hours.",answer:"will have been waiting",analysis:"将来完成进行时"}]},
+        physics:{medium:[{type:"choice",text:"一个物体受到重力为 50N，其质量约为（g=10N/kg）（　）",options:["A. 5kg","B. 50kg","C. 500kg","D. 0.5kg"],answer:"A",analysis:"G=mg, m=G/g=5kg"},{type:"fill_blank",text:"光在真空中的速度约为 ______ m/s。",answer:"3×10⁸",analysis:"光速 c≈3×10⁸ m/s"}]},
+        chemistry:{medium:[{type:"choice",text:"下列属于纯净物的是（　）",options:["A. 空气","B. 食盐水","C. 蒸馏水","D. 合金"],answer:"C",analysis:"蒸馏水只含H₂O一种物质"}]},
+        biology:{medium:[{type:"choice",text:"DNA的中文名称是（　）",options:["A. 核糖核酸","B. 脱氧核糖核酸","C. 氨基酸","D. 蛋白质"],answer:"B",analysis:"DNA = 脱氧核糖核酸"}]},
+        history:{medium:[{type:"choice",text:"中国历史上第一个统一的封建王朝是（　）",options:["A. 夏朝","B. 商朝","C. 秦朝","D. 汉朝"],answer:"C",analysis:"秦王嬴政于公元前221年统一六国"}]},
+        geography:{medium:[{type:"choice",text:"世界上面积最大的洋是（　）",options:["A. 大西洋","B. 印度洋","C. 太平洋","D. 北冰洋"],answer:"C",analysis:"太平洋面积约1.8亿km²"}]},
+        politics:{medium:[{type:"choice",text:"我国宪法规定一切权力属于（　）",options:["A. 公民","B. 人民","C. 政府","D. 党"],answer:"B",analysis:"宪法第二条规定：一切权力属于人民"}]}
+    };
+
+    // ==================== 界面逻辑 ====================
+    function updateSubjectOptions() {
+        var gradeNum = parseInt(gradeSelect.value, 10);
+        var currentVal = subjectSelect.value;
+        subjectSelect.innerHTML = '';
+        ALL_SUBJECTS.forEach(function (subj) {
+            if (gradeNum >= subj.minGrade && gradeNum <= subj.maxGrade) {
+                var opt = document.createElement('option');
+                opt.value = subj.code;
+                opt.textContent = subj.name;
+                if (subj.code === currentVal) opt.selected = true;
+                subjectSelect.appendChild(opt);
+            }
+        });
+        if (!subjectSelect.querySelector('option[selected]')) {
+            if (subjectSelect.options.length > 0) subjectSelect.options[0].selected = true;
+        }
+        updateKnowledgeCheckboxes();
+    }
+
+    function updateKnowledgeCheckboxes() {
+        var subject = subjectSelect.value;
+        var grade = gradeSelect.value;
+        var points = (KNOWLEDGE_MAP[subject] || {})[grade] || [];
+        if (points.length === 0) {
+            for (var g = parseInt(grade); g >= 1; g--) {
+                points = (KNOWLEDGE_MAP[subject] || {})[String(g)] || [];
+                if (points.length > 0) break;
+            }
+        }
+        knowledgeGrid.innerHTML = '';
+        points.forEach(function (kp) {
+            var label = document.createElement('label');
+            var input = document.createElement('input');
+            input.type = 'checkbox'; input.name = 'knowledge'; input.value = kp.label;
+            label.appendChild(input);
+            label.appendChild(document.createTextNode(kp.label));
+            knowledgeGrid.appendChild(label);
+        });
+        var cbs = knowledgeGrid.querySelectorAll('input[type="checkbox"]');
+        cbs.forEach(function (cb, i) { if (i < 3) cb.checked = true; });
+    }
+
+    subjectSelect.addEventListener('change', updateKnowledgeCheckboxes);
+    gradeSelect.addEventListener('change', function () { updateSubjectOptions(); });
+    document.getElementById('selectAll').addEventListener('click', function (e) {
+        e.preventDefault();
+        knowledgeGrid.querySelectorAll('input[type="checkbox"]').forEach(function (cb) { cb.checked = true; });
+    });
+    document.getElementById('deselectAll').addEventListener('click', function (e) {
+        e.preventDefault();
+        knowledgeGrid.querySelectorAll('input[type="checkbox"]').forEach(function (cb) { cb.checked = false; });
+    });
+    updateSubjectOptions();
+
+    // ==================== 表单提交 ====================
+    var subjectMap = {math:'数学',chinese:'语文',english:'英语',physics:'物理',chemistry:'化学',biology:'生物',history:'历史',geography:'地理',politics:'政治'};
+    var regionMap = {beijing:'北京',shanghai:'上海',guangdong:'广东'};
+    var diffToNum = {easy:1,medium:3,hard:5};
+
+    function setStatus(msg) { statusText.textContent = msg; }
+
+    function buildMetadata(p) {
+        var diffLabel = p.difficulty <= 2 ? '基础' : p.difficulty >= 4 ? '拔高' : '';
+        return {
+            title: (p.regionLabel||'') + '2026年' + diffLabel + (p.subjectLabel||'') + '模拟卷',
+            subject: p.subjectLabel, grade: p.gradeLabel, region: p.regionLabel,
+            total_score: 100, duration_minutes: 90, difficulty: p.difficulty,
+            knowledge_points: p.knowledge
+        };
+    }
+
+    function jumpToRenderer(data) {
+        (data.questions||[]).forEach(function(q){ q.difficulty = q.difficulty || 3; });
+        var paperData = {questions: data.questions, metadata: buildMetadata(paramsCache), source: 'api'};
+        localStorage.setItem('paperData', JSON.stringify(paperData));
+        window.location.href = 'paper_renderer.html';
+    }
+
+    var paramsCache = null;
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var grade = gradeSelect.value;
+        var subject = subjectSelect.value;
+        var region = document.getElementById('region').value;
+        var checked = document.querySelectorAll('input[name="knowledge"]:checked');
+        var knowledgeList = []; checked.forEach(function(cb){ knowledgeList.push(cb.value); });
+        var diffEl = document.querySelector('input[name="difficulty"]:checked');
+        var difficulty = diffEl ? diffEl.value : 'medium';
+
+        paramsCache = {
+            grade: parseInt(grade,10), gradeLabel: gradeLabels[grade]||grade,
+            subject: subject, subjectLabel: subjectMap[subject]||subject,
+            region: region, regionLabel: regionMap[region]||region,
+            knowledge: knowledgeList, difficulty: diffToNum[difficulty]||3
+        };
+
+        document.querySelector('.steps').children[1].classList.add('active');
+        output.innerHTML = '<span class="spinner"></span> 正在提交生成任务...';
+        output.scrollIntoView({behavior:'smooth',block:'nearest'});
+        setStatus('生成中...');
+
+        var API_BASE = 'http://127.0.0.1:5000';
+        fetch(API_BASE + '/api/generate_paper_async', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({subject:paramsCache.subject, grade:'grade_'+paramsCache.grade,
+                region:paramsCache.regionLabel, knowledge_points:paramsCache.knowledge,
+                difficulty:paramsCache.difficulty, num_questions:5})
+        })
+        .then(function(r){ return r.json(); })
+        .then(function(data){
+            if (data.status === 'done') {
+                output.innerHTML = '&#9989; (缓存命中) 生成完成，正在跳转...';
+                setStatus('就绪');
+                setTimeout(function(){ jumpToRenderer(data.result); }, 600);
+            } else {
+                var taskId = data.task_id;
+                output.innerHTML = '<span class="spinner"></span> 任务已提交 (' + taskId + ')，等待生成...';
+                pollTask(taskId, 0);
+            }
+        })
+        .catch(function(){
+            output.innerHTML = '&#9888; API 未连接，使用本地模拟数据...';
+            setStatus('离线模式');
+            setTimeout(function(){
+                var bank = MOCK_BANK[paramsCache.subject] || MOCK_BANK.math;
+                var pool = (bank[Object.keys(bank)[0]] || []).slice();
+                var qs = []; for(var i=0;i<5&&pool.length>0;i++) qs.push(pool[i%pool.length]);
+                jumpToRenderer({questions:qs});
+            }, 800);
+        });
+
+        function pollTask(taskId, attempt) {
+            output.innerHTML = '<span class="spinner"></span> 正在生成试卷 (已等待 ' + Math.round(attempt*1.5) + 's)...';
+            fetch(API_BASE + '/api/task_result/' + taskId)
+                .then(function(r){ return r.json(); })
+                .then(function(status){
+                    if (status.status === 'done') {
+                        output.innerHTML = '&#9989; 生成完成，正在跳转...';
+                        setStatus('就绪');
+                        document.querySelector('.steps').children[2].classList.add('active');
+                        jumpToRenderer(status.result);
+                    } else if (status.status === 'error') {
+                        output.innerHTML = '&#9888; 生成失败: ' + (status.error||'未知错误');
+                        setStatus('错误');
+                    } else {
+                        setTimeout(function(){ pollTask(taskId, attempt+1); }, 1500);
+                    }
+                })
+                .catch(function(){ setTimeout(function(){ pollTask(taskId, attempt+1); }, 2000); });
+        }
+    });
+})();
+</script>
+</body>
+</html>

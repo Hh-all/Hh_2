@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "WorkflowState",
+  "description": "工作流状态持久化文件，记录当前流程状态和所有中间产物位置",
+  "type": "object",
+  "required": ["workflow_id", "current_state", "entered_at", "retry_counts", "artifacts"],
+  "properties": {
+    "workflow_id": {
+      "type": "string",
+      "pattern": "^wf_\\d{8}_\\d{6}_[a-z0-9]{6}$",
+      "description": "工作流实例 ID，格式 wf_YYYYMMDD_HHmmss_rand6"
+    },
+    "current_state": {
+      "type": "string",
+      "enum": ["IDLE", "VALIDATING_REQUEST", "PLANNING", "SELECTING", "ASSEMBLING", "CHECKING", "RENDERING", "DONE", "FATAL", "INVALID_REQUEST"],
+      "description": "当前状态"
+    },
+    "previous_state": {
+      "type": "string",
+      "description": "上一个状态"
+    },
+    "entered_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "进入当前状态的时间戳"
+    },
+    "retry_counts": {
+      "type": "object",
+      "required": ["planning", "selecting", "assembling", "checking_loop"],
+      "properties": {
+        "planning": { "type": "integer", "minimum": 0, "maximum": 3 },
+        "selecting": { "type": "integer", "minimum": 0, "maximum": 3 },
+        "assembling": { "type": "integer", "minimum": 0, "maximum": 3 },
+        "checking_loop": { "type": "integer", "minimum": 0, "maximum": 3 }
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "properties": {
+        "paper_plan": { "type": "string", "description": "paper_plan.json 路径" },
+        "question_batch": { "type": "string" },
+        "assembled_paper": { "type": "string" },
+        "quality_report": { "type": "string" }
+      }
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "timestamp": { "type": "string", "format": "date-time" },
+          "state": { "type": "string" },
+          "error_code": { "type": "string" },
+          "message": { "type": "string" }
+        }
+      }
+    }
+  }
+}
