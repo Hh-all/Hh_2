@@ -1,87 +1,425 @@
-# 智能试卷生成系统（RAG + LLM）
+智能试卷生成系统（RAG + LLM）
 
-这是一个基于检索增强生成（RAG）与大模型（LLM）的智能试卷生成与渲染系统。系统支持向量检索（ChromaDB 回退到内存）、LLM 生成、工作流编排、异步任务与 HTML/PDF 导出，适用于教育场景的试卷/练习自动化生成。
+一个基于**检索增强生成（RAG）+ 大语言模型（LLM）**的智能试卷生成与渲染系统。
 
-**主要功能**
-- 基于知识库的检索增强生成（RAG）
-- 可扩展的 LLM 接入（Anthropic/OpenAI 兼容）
-- 编排器（Orchestrator）+ Agent 模式，支持复杂工作流与重试
-- 异步任务队列（Celery 或本地线程池）
-- 模板渲染为 HTML，支持 PDF 导出
-- Docker 化部署与监控支持（Prometheus/Grafana）
+系统面向教育场景，支持从知识库检索相关知识点，由 LLM 按照年级、学科、地区、知识点和难度等条件自动生成试题，并进一步生成完整试卷，支持 HTML / PDF 导出。
 
-**技术栈**
-- Python 3.11
-- Flask（后端 API）
-- ChromaDB / In-memory 向量存储
-- Celery（可选）/ 本地线程池
-- Jinja2 模板 + WeasyPrint（PDF 可选）
-- Docker / Docker Compose
+项目展示
 
-**仓库结构（简要）**
-- [jiaoshi/](jiaoshi/): 应用代码、Docker 与部署脚本
-  - [jiaoshi/backend/](jiaoshi/backend/): 后端实现（生成、检索、编排、渲染）
-  - [jiaoshi/requirements.txt](jiaoshi/requirements.txt#L1): Python 依赖
-- [docs/](docs/): 项目文档与设计说明
-- [data/](data/): 示例与训练数据
-- [frontend/](frontend/): 简单的渲染模板与静态页面
-- [output/](output/): 生成的 HTML/PDF 输出
+智能试卷生成配置页面
 
-**快速开始（本地）**
-1. 克隆仓库并进入项目根目录（已完成）。
-2. 创建虚拟环境并安装依赖：
+系统提供可视化的试卷生成配置界面，可以选择年级、学科、地区、知识点以及试卷难度，并一键生成试卷。
 
-```bash
+<p align="center">
+  <img src="docs/images/project-preview-1.png" alt="智能试卷生成系统配置页面" width="900">
+</p>
+
+AI 试卷生成与在线编辑页面
+
+生成试卷后，系统提供在线预览、难度调整、题目替换/删除、重新生成、打印以及 PDF 下载等功能，方便教师对 AI 生成的试卷进行二次编辑和导出。
+
+<p align="center">
+  <img src="docs/images/project-preview-2.png" alt="智能试卷生成系统在线预览与编辑页面" width="900">
+</p>
+
+主要功能
+
+基于知识库的 RAG 检索
+
+根据年级、学科、知识点等条件检索相关知识内容
+
+支持 ChromaDB 向量数据库
+
+ChromaDB 不可用时自动回退到 In-memory 向量存储
+
+LLM 智能出题
+
+支持 Anthropic / OpenAI 兼容接口
+
+根据知识点和难度自动生成试题
+
+支持复杂试卷生成工作流
+
+Orchestrator + Agent 工作流
+
+通过编排器协调检索、生成、校验和渲染流程
+
+支持 Agent 模式
+
+支持失败重试与流程控制
+
+异步任务处理
+
+支持 Celery + Redis
+
+本地开发环境支持线程池执行
+
+适合耗时的批量试卷生成任务
+
+试卷渲染与导出
+
+Jinja2 模板渲染 HTML
+
+支持 WeasyPrint 导出 PDF
+
+生成结果统一保存到 output/
+
+Docker 化部署
+
+提供 Dockerfile
+
+提供 Docker Compose
+
+支持 Prometheus / Grafana 监控
+
+系统工作流程
+
+用户配置试卷
+    │
+    ├── 年级
+    ├── 学科
+    ├── 地区
+    ├── 知识点
+    └── 难度
+         │
+         ▼
+    RAG 知识检索
+         │
+         ▼
+    LLM 智能生成
+         │
+         ▼
+    试题校验 / 工作流编排
+         │
+         ▼
+    试卷结构化数据
+         │
+         ├──────────────┐
+         ▼              ▼
+      HTML 渲染       PDF 导出
+         │              │
+         └──────┬───────┘
+                ▼
+             最终试卷
+
+技术栈
+
+模块
+
+技术
+
+开发语言
+
+Python 3.11
+
+Web 后端
+
+Flask
+
+RAG / 向量检索
+
+ChromaDB / In-memory
+
+大语言模型
+
+Anthropic / OpenAI Compatible API
+
+工作流
+
+Orchestrator + Agent
+
+异步任务
+
+Celery / ThreadPool
+
+消息队列
+
+Redis（可选）
+
+模板渲染
+
+Jinja2
+
+PDF
+
+WeasyPrint（可选）
+
+容器化
+
+Docker / Docker Compose
+
+监控
+
+Prometheus / Grafana
+
+项目结构
+
+.
+├── jiaoshi/
+│   ├── backend/
+│   │   ├── server.py              # 后端 API 入口
+│   │   ├── rag_indexer.py         # 向量索引
+│   │   ├── rag_searcher.py        # RAG 检索
+│   │   ├── generate_paper.py      # 试卷生成
+│   │   ├── render_paper.py        # HTML / PDF 渲染
+│   │   ├── celery_app.py          # Celery 配置
+│   │   └── async_tasks.py         # 异步任务
+│   └── requirements.txt
+│
+├── frontend/
+│   └── paper_renderer.html        # 前端试卷页面
+│
+├── docs/
+│   ├── images/
+│   │   └── project-preview-1.png  # 项目展示图片
+│   ├── PROJECT_OVERVIEW.md
+│   ├── API_REFERENCE.md
+│   └── DEVELOPER_GUIDE.md
+│
+├── data/                          # 示例数据 / 知识库数据
+├── output/                        # HTML / PDF 输出
+└── README.md
+
+快速开始
+
+1. 创建虚拟环境
+
 python -m venv .venv
+
+Windows：
+
 .venv\Scripts\activate
+
+Linux / macOS：
+
+source .venv/bin/activate
+
+2. 安装依赖
+
 pip install -r jiaoshi/requirements.txt
-```
 
-3. 配置环境变量（示例）：在 `jiaoshi/` 下创建 `.env`，填入 API key 等。参考 `docs/` 中的配置说明。
-4. 启动后端（开发模式）：
+3. 配置环境变量
 
-```bash
+在 jiaoshi/ 下创建 .env 文件，配置 LLM API Key、模型地址以及其他运行参数。
+
+示例：
+
+OPENAI_API_KEY=your_api_key
+OPENAI_BASE_URL=https://api.openai.com/v1
+MODEL_NAME=your-model
+
+实际环境变量名称请以项目代码和 docs/ 中的配置说明为准。
+
+4. 启动后端
+
 python jiaoshi/backend/server.py
-```
 
-5. 打开浏览器查看前端页面：`frontend/paper_renderer.html`，或在 `output/` 中查看生成的 `paper.html`。
+启动后，可以通过浏览器访问前端页面：
 
-**使用（Docker / 生产）**
-- 使用仓库内的 Dockerfile 与 docker-compose 进行容器化部署：
+frontend/paper_renderer.html
 
-```bash
-# 在 jiaoshi 目录下一键构建并启动
+生成的试卷通常可以在：
+
+output/
+
+目录中查看。
+
+Docker 部署
+
+进入 jiaoshi 目录：
+
 cd jiaoshi
+
+使用部署脚本：
+
 ./deploy.sh --docker
-# 或直接使用 docker compose
+
+或者直接使用 Docker Compose：
+
 docker compose up -d --build
-```
 
-- 监控：使用 `docker-compose.monitoring.yml` 启动 Prometheus/Grafana。
+查看运行状态：
 
-**开发者指南**
-- 主要后端入口：[jiaoshi/backend/server.py](jiaoshi/backend/server.py#L1)
-- 向量索引与检索：`rag_indexer.py`, `rag_searcher.py`（位于 [jiaoshi/backend/](jiaoshi/backend/)）
-- 生成逻辑：`generate_paper.py`
-- 渲染：`render_paper.py`（输出 HTML/PDF）
-- 异步任务：`celery_app.py`（Celery）与 `async_tasks.py`（线程池）
+docker compose ps
 
-**部署注意事项**
-- 请确保 Secrets（API keys）通过环境变量或密钥管理工具注入，不要提交到仓库。
-- ChromaDB 优先作为向量存储；若不可用，系统会回退到内存实现，但语义检索质量可能下降。
-- 若使用 Celery，确保 Redis（或其他 broker）已正确配置并运行。
+停止服务：
 
-**文档与参考**
-- 项目概览与架构：`docs/PROJECT_OVERVIEW.md`
-- API 参考与开发指南：`docs/API_REFERENCE.md`、`docs/DEVELOPER_GUIDE.md`
+docker compose down
 
-**贡献**
-欢迎提交 Issue 与 PR。请在贡献前说明变更目的并尽量包含可复现的测试用例。
+监控
 
-**许可证 & 联系**
-- 请在仓库根目录补充许可证文件（如 `LICENSE`）。
-- 有问题请在 Issues 中留言或联系维护人。
+如果项目配置了 Prometheus / Grafana，可以使用：
 
----
+docker compose -f docker-compose.monitoring.yml up -d
 
-README 已生成为项目根的 `README.md`，如需我将其补充更多示例、API 调用示例或添加徽章（CI / coverage），我可以继续完善。
+用于查看系统运行状态、任务执行情况以及相关监控指标。
+
+API 与核心模块
+
+后端入口
+
+jiaoshi/backend/server.py
+
+负责：
+
+HTTP API
+
+试卷生成请求
+
+任务调度
+
+结果返回
+
+RAG 检索
+
+jiaoshi/backend/rag_indexer.py
+jiaoshi/backend/rag_searcher.py
+
+负责：
+
+文档切分
+
+向量化
+
+向量索引
+
+相似度检索
+
+知识点召回
+
+试卷生成
+
+jiaoshi/backend/generate_paper.py
+
+负责：
+
+根据用户条件生成试题
+
+组织题型与知识点
+
+控制试卷难度
+
+生成结构化试卷数据
+
+试卷渲染
+
+jiaoshi/backend/render_paper.py
+
+负责：
+
+Jinja2 HTML 模板渲染
+
+HTML 试卷生成
+
+PDF 导出
+
+异步任务
+
+jiaoshi/backend/celery_app.py
+jiaoshi/backend/async_tasks.py
+
+分别支持：
+
+Celery + Redis
+
+本地线程池
+
+RAG + LLM 核心架构
+
+本项目采用 RAG 与 LLM 结合的方式生成试卷。
+
+知识库
+  │
+  ▼
+文档切分
+  │
+  ▼
+Embedding
+  │
+  ▼
+向量数据库
+  │
+  ▼
+用户试卷配置
+  │
+  ▼
+相似知识检索
+  │
+  ▼
+Prompt 构建
+  │
+  ▼
+LLM
+  │
+  ▼
+结构化试题
+  │
+  ▼
+试卷校验
+  │
+  ▼
+HTML / PDF
+
+相比单纯依赖 LLM 直接生成试题，RAG 可以让模型优先参考指定知识库内容，从而提升生成内容与教学知识点之间的相关性。
+
+开发注意事项
+
+API Key
+
+不要将 API Key、数据库密码等敏感信息直接提交到 Git 仓库。
+
+推荐通过：
+
+.env
+
+Docker Secrets
+
+云平台密钥管理服务
+
+CI/CD Secret
+
+等方式注入。
+
+ChromaDB
+
+系统优先使用 ChromaDB 进行向量存储。
+
+如果 ChromaDB 不可用，系统会自动回退到 In-memory 实现，但重启后内存索引可能丢失，同时语义检索能力和持久化能力可能受到影响。
+
+Celery
+
+如果使用 Celery，需要确保 Redis 或其他 Broker 正常运行，并正确配置相关环境变量。
+
+文档
+
+项目相关文档：
+
+docs/PROJECT_OVERVIEW.md：项目概览与系统架构
+
+docs/API_REFERENCE.md：API 参考
+
+docs/DEVELOPER_GUIDE.md：开发者指南
+
+贡献
+
+欢迎提交 Issue 和 Pull Request。
+
+在提交代码前建议：
+
+明确说明修改目的
+
+尽量提供可复现的测试步骤
+
+不提交 API Key、密码等敏感信息
+
+对核心功能补充必要的测试
+
+License
+
+请在项目根目录补充 LICENSE 文件，并根据项目实际授权方式选择合适的开源许可证。
+
+项目定位
+
+智能试卷生成系统 = 知识库 + RAG + LLM + 工作流 + 自动渲染
+
+目标是将传统的人工组卷流程自动化，让教师可以通过简单的配置快速生成符合指定年级、学科、知识点和难度要求的试卷。
