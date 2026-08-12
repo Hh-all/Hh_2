@@ -11,7 +11,7 @@
 系统提供可视化的试卷生成配置界面，可以选择年级、学科、地区、知识点以及试卷难度，并一键生成试卷。
 
 <p align="center">
-  <img src="docs/images/project-preview-1.png" alt="智能试卷生成系统配置页面" width="900">
+  <img src="docs/project-preview-1.png" alt="智能试卷生成系统配置页面" width="900">
 </p>
 
 ### AI 试卷生成与在线编辑页面
@@ -19,7 +19,7 @@
 生成试卷后，系统提供在线预览、难度调整、题目替换、题目删除、重新生成、打印以及 PDF 下载等功能，方便教师对 AI 生成的试卷进行二次编辑和导出。
 
 <p align="center">
-  <img src="docs/images/project-preview-2.png" alt="智能试卷生成系统在线预览与编辑页面" width="900">
+  <img src="docs/project-preview-2.png" alt="智能试卷生成系统在线预览与编辑页面" width="900">
 </p>
 
 ---
