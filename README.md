@@ -146,9 +146,8 @@
 │   └── paper_renderer.html        # 前端试卷页面
 │
 ├── docs/
-│   ├── images/
-│   │   ├── project-preview-1.png  # 试卷生成配置页面
-│   │   └── project-preview-2.png  # 试卷在线预览与编辑页面
+│   ├──── project-preview-1.png  # 试卷生成配置页面
+│   ├──── project-preview-2.png  # 试卷在线预览与编辑页面
 │   ├── PROJECT_OVERVIEW.md
 │   ├── API_REFERENCE.md
 │   └── DEVELOPER_GUIDE.md
